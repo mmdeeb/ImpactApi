@@ -1,5 +1,8 @@
+using Elfie.Serialization;
 using ImpactBackend.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +24,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ≈÷«›… DbContext Ê«” Œœ«„ ”·”·… «·« ’«· „‰ „·› «·≈⁄œ«œ« 
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+options.UseSqlServer(
+        builder.Configuration["ConnectionStrings:DefaultConnection"] ,
+        b => b.MigrationsAssembly("Impact.Api")));
+
 
 var app = builder.Build();
 
@@ -32,6 +41,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 

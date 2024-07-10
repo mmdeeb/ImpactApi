@@ -8,7 +8,7 @@ namespace ImpactBackend.Infrastructure.Persistence
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : base(options)
+         : base(options)
         {
         }
 
@@ -45,9 +45,20 @@ namespace ImpactBackend.Infrastructure.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // استخدام محرك قاعدة البيانات SQL Server المحلية (localdb) باسم "Cardb"
-            optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ImpactDb");
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer(
+                    "YourConnectionString",
+                    b => b.MigrationsAssembly("Impact.Api"));
+            }
         }
+
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    // استخدام محرك قاعدة البيانات SQL Server المحلية (localdb) باسم "Cardb"
+        //    optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=ImpactDb");
+        //}
 
     }
 }
