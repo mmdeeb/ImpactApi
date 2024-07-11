@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
+using Impact.Api.Models;
 using ImpactBackend.Infrastructure.Persistence;
 
 namespace Impact.Api.Controllers
@@ -23,14 +22,22 @@ namespace Impact.Api.Controllers
 
         // GET: api/TrainingTypes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TrainingType>>> GettrainingTypes()
+        public async Task<ActionResult<IEnumerable<TrainingTypeDTO>>> GetTrainingTypes()
         {
-            return await _context.trainingTypes.ToListAsync();
+            var trainingTypes = await _context.trainingTypes.ToListAsync();
+
+            var trainingTypeDTOs = trainingTypes.Select(tt => new TrainingTypeDTO
+            {
+                Id = tt.Id,
+                TrainingTypeName = tt.TrainingTypeName
+            }).ToList();
+
+            return trainingTypeDTOs;
         }
 
         // GET: api/TrainingTypes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TrainingType>> GetTrainingType(int id)
+        public async Task<ActionResult<TrainingTypeDTO>> GetTrainingType(int id)
         {
             var trainingType = await _context.trainingTypes.FindAsync(id);
 
@@ -39,18 +46,31 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return trainingType;
+            var trainingTypeDTO = new TrainingTypeDTO
+            {
+                Id = trainingType.Id,
+                TrainingTypeName = trainingType.TrainingTypeName
+            };
+
+            return trainingTypeDTO;
         }
 
         // PUT: api/TrainingTypes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTrainingType(int id, TrainingType trainingType)
+        public async Task<IActionResult> PutTrainingType(int id, TrainingTypeDTO trainingTypeDTO)
         {
-            if (id != trainingType.Id)
+            if (id != trainingTypeDTO.Id)
             {
                 return BadRequest();
             }
+
+            var trainingType = await _context.trainingTypes.FindAsync(id);
+            if (trainingType == null)
+            {
+                return NotFound();
+            }
+
+            trainingType.TrainingTypeName = trainingTypeDTO.TrainingTypeName;
 
             _context.Entry(trainingType).State = EntityState.Modified;
 
@@ -74,14 +94,20 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/TrainingTypes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TrainingType>> PostTrainingType(TrainingType trainingType)
+        public async Task<ActionResult<TrainingTypeDTO>> PostTrainingType(TrainingTypeDTO trainingTypeDTO)
         {
+            var trainingType = new TrainingType
+            {
+                TrainingTypeName = trainingTypeDTO.TrainingTypeName
+            };
+
             _context.trainingTypes.Add(trainingType);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTrainingType", new { id = trainingType.Id }, trainingType);
+            trainingTypeDTO.Id = trainingType.Id;
+
+            return CreatedAtAction(nameof(GetTrainingType), new { id = trainingTypeDTO.Id }, trainingTypeDTO);
         }
 
         // DELETE: api/TrainingTypes/5
