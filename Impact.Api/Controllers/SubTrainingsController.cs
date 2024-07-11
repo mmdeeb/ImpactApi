@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,32 +24,51 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SubTraining>>> GetSubTrainings()
+        public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainings()
         {
-            return await _context.subTrainings.ToListAsync();
+            var subTrainings = await _context.subTrainings.ToListAsync();
+
+            var subTrainingDtos = subTrainings.Select(st => new SubTrainingDTO
+            {
+                Id = st.Id,
+                SubTrainingName = st.SubTrainingName,
+                SubTrainingDescription = st.SubTrainingDescription,
+                TrainingTypeId = st.TrainingTypeId
+            }).ToList();
+
+            return Ok(subTrainingDtos);
         }
 
         // GET: api/SubTrainings/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<SubTraining>> GetSubTraining(int id)
+        public async Task<ActionResult<SubTrainingDTO>> GetSubTraining(int id)
         {
-            var subTraining = await _context.subTrainings.FindAsync(id);
+            var subTraining = await _context.subTrainings.FirstOrDefaultAsync(st => st.Id == id);
 
             if (subTraining == null)
             {
                 return NotFound();
             }
 
-            return subTraining;
+            var subTrainingDto = new SubTrainingDTO
+            {
+                Id = subTraining.Id,
+                SubTrainingName = subTraining.SubTrainingName,
+                SubTrainingDescription = subTraining.SubTrainingDescription,
+                TrainingTypeId = subTraining.TrainingTypeId
+            };
+
+            return Ok(subTrainingDto);
         }
 
         // GET: api/SubTrainings/GetSubTrainingsByTrainer/5
         [HttpGet("GetSubTrainingsByTrainer/{trainerId}")]
-        public async Task<ActionResult<IEnumerable<SubTraining>>> GetSubTrainingsByTrainer(int trainerId)
+        public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainingsByTrainer(int trainerId)
         {
             var subTrainings = await _context.trainers
                                              .Where(t => t.Id == trainerId)
                                              .SelectMany(t => t.SubTraining)
+                                             .Include(st => st.Trainers)
                                              .ToListAsync();
 
             if (subTrainings == null || !subTrainings.Any())
@@ -56,17 +76,35 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(subTrainings);
+            var subTrainingDtos = subTrainings.Select(st => new SubTrainingDTO
+            {
+                Id = st.Id,
+                SubTrainingName = st.SubTrainingName,
+                SubTrainingDescription = st.SubTrainingDescription,
+                TrainingTypeId = st.TrainingTypeId
+            }).ToList();
+
+            return Ok(subTrainingDtos);
         }
 
         // PUT: api/SubTrainings/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSubTraining(int id, SubTraining subTraining)
+        public async Task<IActionResult> PutSubTraining(int id, SubTrainingDTO subTrainingDto)
         {
-            if (id != subTraining.Id)
+            if (id != subTrainingDto.Id)
             {
                 return BadRequest();
             }
+
+            var subTraining = await _context.subTrainings.FindAsync(id);
+            if (subTraining == null)
+            {
+                return NotFound();
+            }
+
+            subTraining.SubTrainingName = subTrainingDto.SubTrainingName;
+            subTraining.SubTrainingDescription = subTrainingDto.SubTrainingDescription;
+            subTraining.TrainingTypeId = subTrainingDto.TrainingTypeId;
 
             _context.Entry(subTraining).State = EntityState.Modified;
 
@@ -91,18 +129,26 @@ namespace Impact.Api.Controllers
 
         // POST: api/SubTrainings
         [HttpPost]
-        public async Task<ActionResult<SubTraining>> PostSubTraining(SubTraining subTraining)
+        public async Task<ActionResult<SubTrainingDTO>> PostSubTraining(SubTrainingDTO subTrainingDto)
         {
+            var subTraining = new SubTraining
+            {
+                SubTrainingName = subTrainingDto.SubTrainingName,
+                SubTrainingDescription = subTrainingDto.SubTrainingDescription,
+                TrainingTypeId = subTrainingDto.TrainingTypeId
+            };
+
             _context.subTrainings.Add(subTraining);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSubTraining", new { id = subTraining.Id }, subTraining);
-        }
+            subTrainingDto.Id = subTraining.Id;
 
+            return CreatedAtAction("GetSubTraining", new { id = subTraining.Id }, subTrainingDto);
+        }
 
         // POST: api/SubTrainings/5/AddTrainers
         [HttpPost("{subTrainingId}/AddTrainers")]
-        public async Task<IActionResult> AddTrainersToSubTraining(int subTrainingId, [FromBody] List<int> trainerIds)
+        public async Task<ActionResult<SubTrainingDTO>> AddTrainersToSubTraining(int subTrainingId, [FromBody] List<int> trainerIds)
         {
             var subTraining = await _context.subTrainings
                                              .Include(st => st.Trainers)
@@ -130,7 +176,15 @@ namespace Impact.Api.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            var subTrainingDto = new SubTrainingDTO
+            {
+                Id = subTraining.Id,
+                SubTrainingName = subTraining.SubTrainingName,
+                SubTrainingDescription = subTraining.SubTrainingDescription,
+                TrainingTypeId = subTraining.TrainingTypeId
+            };
+
+            return Ok(subTrainingDto);
         }
 
         // DELETE: api/SubTrainings/5

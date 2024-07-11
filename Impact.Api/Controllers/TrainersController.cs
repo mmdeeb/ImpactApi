@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,32 +24,55 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Trainer>>> GetTrainers()
+        public async Task<ActionResult<IEnumerable<TrainerDTO>>> GetTrainers()
         {
-            return await _context.trainers.ToListAsync();
+            var trainers = await _context.trainers.ToListAsync();
+
+            var trainerDtos = trainers.Select(t => new TrainerDTO
+            {
+                Id = t.Id,
+                TrainerName = t.TrainerName,
+                ListSkills = t.ListSkills,
+                TrainerSpecialization = t.TrainerSpecialization,
+                Summary = t.Summary,
+                CV = t.CV
+            }).ToList();
+
+            return Ok(trainerDtos);
         }
 
         // GET: api/Trainers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Trainer>> GetTrainer(int id)
+        public async Task<ActionResult<TrainerDTO>> GetTrainer(int id)
         {
-            var trainer = await _context.trainers.FindAsync(id);
+            var trainer = await _context.trainers.FirstOrDefaultAsync(t => t.Id == id);
 
             if (trainer == null)
             {
                 return NotFound();
             }
 
-            return trainer;
+            var trainerDto = new TrainerDTO
+            {
+                Id = trainer.Id,
+                TrainerName = trainer.TrainerName,
+                ListSkills = trainer.ListSkills,
+                TrainerSpecialization = trainer.TrainerSpecialization,
+                Summary = trainer.Summary,
+                CV = trainer.CV
+            };
+
+            return Ok(trainerDto);
         }
 
         // GET: api/Trainers/GetTrainersBySubTraining/5
         [HttpGet("GetTrainersBySubTraining/{subTrainingId}")]
-        public async Task<ActionResult<IEnumerable<Trainer>>> GetTrainersBySubTraining(int subTrainingId)
+        public async Task<ActionResult<IEnumerable<TrainerDTO>>> GetTrainersBySubTraining(int subTrainingId)
         {
             var trainers = await _context.subTrainings
                                          .Where(st => st.Id == subTrainingId)
                                          .SelectMany(st => st.Trainers)
+                                         .Include(t => t.SubTraining)
                                          .ToListAsync();
 
             if (trainers == null || !trainers.Any())
@@ -56,17 +80,39 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return Ok(trainers);
+            var trainerDtos = trainers.Select(t => new TrainerDTO
+            {
+                Id = t.Id,
+                TrainerName = t.TrainerName,
+                ListSkills = t.ListSkills,
+                TrainerSpecialization = t.TrainerSpecialization,
+                Summary = t.Summary,
+                CV = t.CV
+            }).ToList();
+
+            return Ok(trainerDtos);
         }
 
         // PUT: api/Trainers/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTrainer(int id, Trainer trainer)
+        public async Task<IActionResult> PutTrainer(int id, TrainerDTO trainerDto)
         {
-            if (id != trainer.Id)
+            if (id != trainerDto.Id)
             {
                 return BadRequest();
             }
+
+            var trainer = await _context.trainers.FindAsync(id);
+            if (trainer == null)
+            {
+                return NotFound();
+            }
+
+            trainer.TrainerName = trainerDto.TrainerName;
+            trainer.ListSkills = trainerDto.ListSkills;
+            trainer.TrainerSpecialization = trainerDto.TrainerSpecialization;
+            trainer.Summary = trainerDto.Summary;
+            trainer.CV = trainerDto.CV;
 
             _context.Entry(trainer).State = EntityState.Modified;
 
@@ -91,18 +137,28 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainers
         [HttpPost]
-        public async Task<ActionResult<Trainer>> PostTrainer(Trainer trainer)
+        public async Task<ActionResult<TrainerDTO>> PostTrainer(TrainerDTO trainerDto)
         {
+            var trainer = new Trainer
+            {
+                TrainerName = trainerDto.TrainerName,
+                ListSkills = trainerDto.ListSkills,
+                TrainerSpecialization = trainerDto.TrainerSpecialization,
+                Summary = trainerDto.Summary,
+                CV = trainerDto.CV
+            };
+
             _context.trainers.Add(trainer);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTrainer", new { id = trainer.Id }, trainer);
-        }
+            trainerDto.Id = trainer.Id;
 
+            return CreatedAtAction("GetTrainer", new { id = trainer.Id }, trainerDto);
+        }
 
         // POST: api/Trainers/5/AddSubTrainings
         [HttpPost("{trainerId}/AddSubTrainings")]
-        public async Task<IActionResult> AddSubTrainingsToTrainer(int trainerId, [FromBody] List<int> subTrainingIds)
+        public async Task<ActionResult<TrainerDTO>> AddSubTrainingsToTrainer(int trainerId, [FromBody] List<int> subTrainingIds)
         {
             var trainer = await _context.trainers
                                         .Include(t => t.SubTraining)
@@ -130,9 +186,18 @@ namespace Impact.Api.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+            var trainerDto = new TrainerDTO
+            {
+                Id = trainer.Id,
+                TrainerName = trainer.TrainerName,
+                ListSkills = trainer.ListSkills,
+                TrainerSpecialization = trainer.TrainerSpecialization,
+                Summary = trainer.Summary,
+                CV = trainer.CV
+            };
 
+            return Ok(trainerDto);
+        }
 
         // DELETE: api/Trainers/5
         [HttpDelete("{id}")]
