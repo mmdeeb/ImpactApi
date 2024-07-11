@@ -118,7 +118,7 @@ namespace Impact.Api.Controllers
                 trainer.SubTraining = new List<SubTraining>();
             }
 
-            var subTrainings = await _context..Where(st => subTrainingIds.Contains(st.Id)).ToListAsync();
+            var subTrainings = await _context.subTrainings.Where(st => subTrainingIds.Contains(st.Id)).ToListAsync();
 
             foreach (var subTraining in subTrainings)
             {
