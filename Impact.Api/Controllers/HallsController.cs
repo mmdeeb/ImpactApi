@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,24 @@ namespace Impact.Api.Controllers
 
         // GET: api/Halls
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Hall>>> Gethalls()
+        public async Task<ActionResult<IEnumerable<HallDTO>>> GetHalls()
         {
-            return await _context.halls.ToListAsync();
+            var halls = await _context.halls.ToListAsync();
+
+            var hallDtos = halls.Select(hall => new HallDTO
+            {
+                Id = hall.Id,
+                HallName = hall.HallName,
+                CenterId = hall.CenterId,
+                ListDetials = hall.ListDetials
+            }).ToList();
+
+            return Ok(hallDtos);
         }
 
         // GET: api/Halls/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Hall>> GetHall(int id)
+        public async Task<ActionResult<HallDTO>> GetHall(int id)
         {
             var hall = await _context.halls.FindAsync(id);
 
@@ -39,18 +50,59 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return hall;
+            var hallDto = new HallDTO
+            {
+                Id = hall.Id,
+                HallName = hall.HallName,
+                CenterId = hall.CenterId,
+                ListDetials = hall.ListDetials
+            };
+
+            return Ok(hallDto);
+        }
+
+        // GET: api/Halls/ByCenter/5
+        [HttpGet("ByCenter/{centerId}")]
+        public async Task<ActionResult<IEnumerable<HallDTO>>> GetHallsByCenter(int centerId)
+        {
+            var halls = await _context.halls
+                                      .Where(h => h.CenterId == centerId)
+                                      .ToListAsync();
+
+            if (halls == null || !halls.Any())
+            {
+                return NotFound();
+            }
+
+            var hallDtos = halls.Select(hall => new HallDTO
+            {
+                Id = hall.Id,
+                HallName = hall.HallName,
+                CenterId = hall.CenterId,
+                ListDetials = hall.ListDetials
+            }).ToList();
+
+            return Ok(hallDtos);
         }
 
         // PUT: api/Halls/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutHall(int id, Hall hall)
+        public async Task<IActionResult> PutHall(int id, HallDTO hallDto)
         {
-            if (id != hall.Id)
+            if (id != hallDto.Id)
             {
                 return BadRequest();
             }
+
+            var hall = await _context.halls.FindAsync(id);
+            if (hall == null)
+            {
+                return NotFound();
+            }
+
+            hall.HallName = hallDto.HallName;
+            hall.CenterId = hallDto.CenterId;
+            hall.ListDetials = hallDto.ListDetials;
 
             _context.Entry(hall).State = EntityState.Modified;
 
@@ -74,14 +126,22 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Halls
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Hall>> PostHall(Hall hall)
+        public async Task<ActionResult<HallDTO>> PostHall(HallDTO hallDto)
         {
+            var hall = new Hall
+            {
+                HallName = hallDto.HallName,
+                CenterId = hallDto.CenterId,
+                ListDetials = hallDto.ListDetials
+            };
+
             _context.halls.Add(hall);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetHall", new { id = hall.Id }, hall);
+            hallDto.Id = hall.Id;
+
+            return CreatedAtAction("GetHall", new { id = hall.Id }, hallDto);
         }
 
         // DELETE: api/Halls/5

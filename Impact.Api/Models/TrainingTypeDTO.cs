@@ -1,8 +1,7 @@
-﻿namespace Impact.Api.Models
+﻿namespace Impact.Api.Models;
+
+public class TrainingTypeDTO
 {
-    public class TrainingTypeDTO
-    {
-        public int Id { get; set; }
-        public string? TrainingTypeName { get; set; }
-    }
+    public int Id { get; set; }
+    public string? TrainingTypeName { get; set; }
 }

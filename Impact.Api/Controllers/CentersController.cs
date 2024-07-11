@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,25 @@ namespace Impact.Api.Controllers
 
         // GET: api/Centers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Center>>> Getcenters()
+        public async Task<ActionResult<IEnumerable<CenterDTO>>> GetCenters()
         {
-            return await _context.centers.ToListAsync();
+            var centers = await _context.centers.ToListAsync();
+
+            var centerDtos = centers.Select(center => new CenterDTO
+            {
+                Id = center.Id,
+                CenterName = center.CenterName,
+                CenterLocation = center.CenterLocation,
+                PhoneNumber = center.PhoneNumber,
+                Media = center.Media
+            }).ToList();
+
+            return Ok(centerDtos);
         }
 
         // GET: api/Centers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Center>> GetCenter(int id)
+        public async Task<ActionResult<CenterDTO>> GetCenter(int id)
         {
             var center = await _context.centers.FindAsync(id);
 
@@ -39,18 +51,38 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return center;
+            var centerDto = new CenterDTO
+            {
+                Id = center.Id,
+                CenterName = center.CenterName,
+                CenterLocation = center.CenterLocation,
+                PhoneNumber = center.PhoneNumber,
+                Media = center.Media
+            };
+
+            return Ok(centerDto);
         }
 
         // PUT: api/Centers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCenter(int id, Center center)
+        public async Task<IActionResult> PutCenter(int id, CenterDTO centerDto)
         {
-            if (id != center.Id)
+            if (id != centerDto.Id)
             {
                 return BadRequest();
             }
+
+            var center = await _context.centers.FindAsync(id);
+            if (center == null)
+            {
+                return NotFound();
+            }
+
+            center.CenterName = centerDto.CenterName;
+            center.CenterLocation = centerDto.CenterLocation;
+            center.PhoneNumber = centerDto.PhoneNumber;
+            center.Media = centerDto.Media;
 
             _context.Entry(center).State = EntityState.Modified;
 
@@ -76,12 +108,22 @@ namespace Impact.Api.Controllers
         // POST: api/Centers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Center>> PostCenter(Center center)
+        public async Task<ActionResult<CenterDTO>> PostCenter(CenterDTO centerDto)
         {
+            var center = new Center
+            {
+                CenterName = centerDto.CenterName,
+                CenterLocation = centerDto.CenterLocation,
+                PhoneNumber = centerDto.PhoneNumber,
+                Media = centerDto.Media
+            };
+
             _context.centers.Add(center);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCenter", new { id = center.Id }, center);
+            centerDto.Id = center.Id;
+
+            return CreatedAtAction("GetCenter", new { id = center.Id }, centerDto);
         }
 
         // DELETE: api/Centers/5
