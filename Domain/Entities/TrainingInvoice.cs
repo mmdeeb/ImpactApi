@@ -18,5 +18,4 @@ public class TrainingInvoice : BaseAuditableEntity
       
     public List<AdditionalCost>? AdditionalCosts { get; set; } = new List<AdditionalCost>();
     public List<Mail>? Meals { get; set; } = new List<Mail>();
-    public List<LogisticCost>? LogisticCosts { get; set; } = new List<LogisticCost>();
 }

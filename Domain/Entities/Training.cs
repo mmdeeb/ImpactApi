@@ -9,19 +9,16 @@ public class Training : BaseAuditableEntity
     public int NumberOfStudents { get; set; }
     public string? TrainingDetails { get; set;}
  
-    public List<AdditionalCost>? AdditionalCosts { get; set; } = new List<AdditionalCost>(); //  تكاليف اضافية للتدريب
    
-    public List<Attendance>? Attendances { get; set; } = new List<Attendance>(); // سجلات الحضور للتدريب
+    public List<Attendance>? Attendances { get; set; } = new List<Attendance>(); 
  
     public int TrainingInvoiceId { get; set; } 
-    public TrainingInvoice? TrainingInvoice { get; set; } // فاتورة التدريب
+    public TrainingInvoice? TrainingInvoice { get; set; }
   
-    public List<Trainee>? Trainees { get; set; } = new List<Trainee>(); //  مجموعة متدربين للتدريب
+    public List<Trainee>? Trainees { get; set; } = new List<Trainee>(); 
   
-    public List<Reservation>? Reservations { get; set; } = new List<Reservation>(); // التدريب له مجموعة حجوزات
-  
-    public List<Mail>? Mail { get; set; } = new List<Mail>(); // التدريب له مجموعة وجبات
-   
-    public Client? Clint { get; set; } // الزبون الذي حجز هذا التدريب
+    public List<Reservation>? Reservations { get; set; } = new List<Reservation>(); 
+     
+    public Client? Clint { get; set; } 
     public int ClientId { get; set; } 
 }

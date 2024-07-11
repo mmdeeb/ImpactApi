@@ -12,8 +12,8 @@ public class Mail : BaseAuditableEntity
     public double TotalPrice { get; set; }
     public double TotalPriceForORG { get; set; }
 
-    public int TrainingId { get; set; }
-    public Training? Training { get; set; }
+    public int TrainingInvoiceId { get; set; }
+    public TrainingInvoice? TrainingInvoice { get; set; }
     
 }
 
