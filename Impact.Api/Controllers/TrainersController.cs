@@ -23,7 +23,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Trainer>>> Gettrainers()
+        public async Task<ActionResult<IEnumerable<Trainer>>> GetTrainers()
         {
             return await _context.trainers.ToListAsync();
         }
@@ -42,8 +42,24 @@ namespace Impact.Api.Controllers
             return trainer;
         }
 
+        // GET: api/Trainers/GetTrainersBySubTraining/5
+        [HttpGet("GetTrainersBySubTraining/{subTrainingId}")]
+        public async Task<ActionResult<IEnumerable<Trainer>>> GetTrainersBySubTraining(int subTrainingId)
+        {
+            var trainers = await _context.subTrainings
+                                         .Where(st => st.Id == subTrainingId)
+                                         .SelectMany(st => st.Trainers)
+                                         .ToListAsync();
+
+            if (trainers == null || !trainers.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(trainers);
+        }
+
         // PUT: api/Trainers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTrainer(int id, Trainer trainer)
         {
@@ -74,7 +90,6 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Trainers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Trainer>> PostTrainer(Trainer trainer)
         {
@@ -83,6 +98,41 @@ namespace Impact.Api.Controllers
 
             return CreatedAtAction("GetTrainer", new { id = trainer.Id }, trainer);
         }
+
+
+        // POST: api/Trainers/5/AddSubTrainings
+        [HttpPost("{trainerId}/AddSubTrainings")]
+        public async Task<IActionResult> AddSubTrainingsToTrainer(int trainerId, [FromBody] List<int> subTrainingIds)
+        {
+            var trainer = await _context.trainers
+                                        .Include(t => t.SubTraining)
+                                        .FirstOrDefaultAsync(t => t.Id == trainerId);
+
+            if (trainer == null)
+            {
+                return NotFound();
+            }
+
+            if (trainer.SubTraining == null)
+            {
+                trainer.SubTraining = new List<SubTraining>();
+            }
+
+            var subTrainings = await _context..Where(st => subTrainingIds.Contains(st.Id)).ToListAsync();
+
+            foreach (var subTraining in subTrainings)
+            {
+                if (!trainer.SubTraining.Contains(subTraining))
+                {
+                    trainer.SubTraining.Add(subTraining);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
 
         // DELETE: api/Trainers/5
         [HttpDelete("{id}")]
