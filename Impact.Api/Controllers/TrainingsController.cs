@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,26 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Training>>> Gettrainings()
+        public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetTrainings()
         {
-            return await _context.trainings.ToListAsync();
+            var trainings = await _context.trainings.ToListAsync();
+
+            var trainingDtos = trainings.Select(training => new TrainingDTO
+            {
+                Id = training.Id,
+                TrainingName = training.TrainingName,
+                NumberOfStudents = training.NumberOfStudents,
+                TrainingDetails = training.TrainingDetails,
+                TrainingInvoiceId = training.TrainingInvoiceId,
+                ClientId = training.ClientId
+            }).ToList();
+
+            return Ok(trainingDtos);
         }
 
         // GET: api/Trainings/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Training>> GetTraining(int id)
+        public async Task<ActionResult<TrainingDTO>> GetTraining(int id)
         {
             var training = await _context.trainings.FindAsync(id);
 
@@ -39,18 +52,90 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return training;
+            var trainingDto = new TrainingDTO
+            {
+                Id = training.Id,
+                TrainingName = training.TrainingName,
+                NumberOfStudents = training.NumberOfStudents,
+                TrainingDetails = training.TrainingDetails,
+                TrainingInvoiceId = training.TrainingInvoiceId,
+                ClientId = training.ClientId
+            };
+
+            return Ok(trainingDto);
+        }
+
+        // GET: api/Trainings/ByClient/5
+        [HttpGet("ByClient/{clientId}")]
+        public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetTrainingsByClient(int clientId)
+        {
+            var trainings = await _context.trainings
+                                          .Where(t => t.ClientId == clientId)
+                                          .ToListAsync();
+
+            if (trainings == null || !trainings.Any())
+            {
+                return NotFound();
+            }
+
+            var trainingDtos = trainings.Select(training => new TrainingDTO
+            {
+                Id = training.Id,
+                TrainingName = training.TrainingName,
+                NumberOfStudents = training.NumberOfStudents,
+                TrainingDetails = training.TrainingDetails,
+                TrainingInvoiceId = training.TrainingInvoiceId,
+                ClientId = training.ClientId
+            }).ToList();
+
+            return Ok(trainingDtos);
+        }
+
+        // GET: api/Trainings/ByInvoice/5
+        [HttpGet("ByInvoice/{trainingInvoiceId}")]
+        public async Task<ActionResult<TrainingDTO>> GetTrainingByInvoice(int trainingInvoiceId)
+        {
+            var training = await _context.trainings
+                                         .FirstOrDefaultAsync(t => t.TrainingInvoiceId == trainingInvoiceId);
+
+            if (training == null)
+            {
+                return NotFound();
+            }
+
+            var trainingDto = new TrainingDTO
+            {
+                Id = training.Id,
+                TrainingName = training.TrainingName,
+                NumberOfStudents = training.NumberOfStudents,
+                TrainingDetails = training.TrainingDetails,
+                TrainingInvoiceId = training.TrainingInvoiceId,
+                ClientId = training.ClientId
+            };
+
+            return Ok(trainingDto);
         }
 
         // PUT: api/Trainings/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTraining(int id, Training training)
+        public async Task<IActionResult> PutTraining(int id, TrainingDTO trainingDto)
         {
-            if (id != training.Id)
+            if (id != trainingDto.Id)
             {
                 return BadRequest();
             }
+
+            var training = await _context.trainings.FindAsync(id);
+            if (training == null)
+            {
+                return NotFound();
+            }
+
+            training.TrainingName = trainingDto.TrainingName;
+            training.NumberOfStudents = trainingDto.NumberOfStudents;
+            training.TrainingDetails = trainingDto.TrainingDetails;
+            training.TrainingInvoiceId = trainingDto.TrainingInvoiceId;
+            training.ClientId = trainingDto.ClientId;
 
             _context.Entry(training).State = EntityState.Modified;
 
@@ -74,14 +159,24 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Trainings
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Training>> PostTraining(Training training)
+        public async Task<ActionResult<TrainingDTO>> PostTraining(TrainingDTO trainingDto)
         {
+            var training = new Training
+            {
+                TrainingName = trainingDto.TrainingName,
+                NumberOfStudents = trainingDto.NumberOfStudents,
+                TrainingDetails = trainingDto.TrainingDetails,
+                TrainingInvoiceId = trainingDto.TrainingInvoiceId,
+                ClientId = trainingDto.ClientId
+            };
+
             _context.trainings.Add(training);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTraining", new { id = training.Id }, training);
+            trainingDto.Id = training.Id;
+
+            return CreatedAtAction("GetTraining", new { id = training.Id }, trainingDto);
         }
 
         // DELETE: api/Trainings/5

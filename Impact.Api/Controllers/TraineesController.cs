@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,34 +24,85 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainees
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Trainee>>> Gettrainees()
+        public async Task<ActionResult<IEnumerable<TraineeDTO>>> GetTrainees()
         {
-            return await _context.trainees.ToListAsync();
+            var trainees = await _context.trainees.ToListAsync();
+
+            var traineeDtos = trainees.Select(trainee => new TraineeDTO
+            {
+                Id = trainee.Id,
+                TraineeName = trainee.TraineeName,
+                ListAttendanceStatus = trainee.ListAttendanceStatus,
+                TrainingId = trainee.TrainingId,
+            }).ToList();
+
+            return Ok(traineeDtos);
         }
 
         // GET: api/Trainees/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Trainee>> GetTrainee(int id)
+        public async Task<ActionResult<TraineeDTO>> GetTrainee(int id)
         {
-            var trainee = await _context.trainees.FindAsync(id);
+            var trainee = await _context.trainees.FirstOrDefaultAsync(t => t.Id == id);
 
             if (trainee == null)
             {
                 return NotFound();
             }
 
-            return trainee;
+            var traineeDto = new TraineeDTO
+            {
+                Id = trainee.Id,
+                TraineeName = trainee.TraineeName,
+                ListAttendanceStatus = trainee.ListAttendanceStatus,
+                TrainingId = trainee.TrainingId,
+            };
+
+            return Ok(traineeDto);
+        }
+
+        // GET: api/Trainees/ByTraining/5
+        [HttpGet("ByTraining/{trainingId}")]
+        public async Task<ActionResult<IEnumerable<TraineeDTO>>> GetTraineesByTraining(int trainingId)
+        {
+            var trainees = await _context.trainees
+                                         .Where(t => t.TrainingId == trainingId)
+                                         .ToListAsync();
+
+            if (trainees == null || !trainees.Any())
+            {
+                return NotFound();
+            }
+
+            var traineeDtos = trainees.Select(trainee => new TraineeDTO
+            {
+                Id = trainee.Id,
+                TraineeName = trainee.TraineeName,
+                ListAttendanceStatus = trainee.ListAttendanceStatus,
+                TrainingId = trainee.TrainingId,
+            }).ToList();
+
+            return Ok(traineeDtos);
         }
 
         // PUT: api/Trainees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTrainee(int id, Trainee trainee)
+        public async Task<IActionResult> PutTrainee(int id, TraineeDTO traineeDto)
         {
-            if (id != trainee.Id)
+            if (id != traineeDto.Id)
             {
                 return BadRequest();
             }
+
+            var trainee = await _context.trainees.FindAsync(id);
+            if (trainee == null)
+            {
+                return NotFound();
+            }
+
+            trainee.TraineeName = traineeDto.TraineeName;
+            trainee.ListAttendanceStatus = traineeDto.ListAttendanceStatus;
+            trainee.TrainingId = traineeDto.TrainingId;
 
             _context.Entry(trainee).State = EntityState.Modified;
 
@@ -74,14 +126,22 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Trainees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Trainee>> PostTrainee(Trainee trainee)
+        public async Task<ActionResult<TraineeDTO>> PostTrainee(TraineeDTO traineeDto)
         {
+            var trainee = new Trainee
+            {
+                TraineeName = traineeDto.TraineeName,
+                ListAttendanceStatus = traineeDto.ListAttendanceStatus,
+                TrainingId = traineeDto.TrainingId
+            };
+
             _context.trainees.Add(trainee);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTrainee", new { id = trainee.Id }, trainee);
+            traineeDto.Id = trainee.Id;
+
+            return CreatedAtAction("GetTrainee", new { id = trainee.Id }, traineeDto);
         }
 
         // DELETE: api/Trainees/5
