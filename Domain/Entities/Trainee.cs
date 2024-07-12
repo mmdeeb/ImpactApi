@@ -6,7 +6,7 @@ public class Trainee : BaseAuditableEntity
 {
     public string? TraineeName { get; set; }
     public string? ListAttendanceStatus { get; set; }
-    public Training? Training { get; set; } // المتدرب يحضر تدريب واحد
+    public Training? Training { get; set; } 
     [ForeignKey("Training")]
     public int TrainingId { get; set; }
 }

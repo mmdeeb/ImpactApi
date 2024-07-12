@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,34 +24,84 @@ namespace Impact.Api.Controllers
 
         // GET: api/Attendances
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attendance>>> Getattendances()
+        public async Task<ActionResult<IEnumerable<AttendanceDTO>>> GetAttendances()
         {
-            return await _context.attendances.ToListAsync();
+            var attendances = await _context.attendances.Include(a => a.Training).ToListAsync();
+
+            var attendanceDtos = attendances.Select(attendance => new AttendanceDTO
+            {
+                Id = attendance.Id,
+                AttendanceName = attendance.AttendanceName,
+                TrainingId = attendance.TrainingId,
+                TrainingName = attendance.Training?.TrainingName
+            }).ToList();
+
+            return Ok(attendanceDtos);
         }
 
         // GET: api/Attendances/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Attendance>> GetAttendance(int id)
+        public async Task<ActionResult<AttendanceDTO>> GetAttendance(int id)
         {
-            var attendance = await _context.attendances.FindAsync(id);
+            var attendance = await _context.attendances.FirstOrDefaultAsync(a => a.Id == id);
 
             if (attendance == null)
             {
                 return NotFound();
             }
 
-            return attendance;
+            var attendanceDto = new AttendanceDTO
+            {
+                Id = attendance.Id,
+                AttendanceName = attendance.AttendanceName,
+                TrainingId = attendance.TrainingId,
+                TrainingName = attendance.Training?.TrainingName
+            };
+
+            return Ok(attendanceDto);
+        }
+
+        // GET: api/Attendances/Trainees/5
+        [HttpGet("Trainees/{attendanceId}")]
+        public async Task<ActionResult<IEnumerable<TraineeDTO>>> GetTraineesByAttendance(int attendanceId)
+        {
+            var attendance = await _context.attendances
+                                           .Include(a => a.Trainee)
+                                           .FirstOrDefaultAsync(a => a.Id == attendanceId);
+
+            if (attendance == null)
+            {
+                return NotFound();
+            }
+
+            var traineeDtos = attendance.Trainee?.Select(t => new TraineeDTO
+            {
+                Id = t.Id,
+                TraineeName = t.TraineeName,
+                ListAttendanceStatus = t.ListAttendanceStatus,
+                TrainingId = t.TrainingId,
+            }).ToList();
+
+            return Ok(traineeDtos);
         }
 
         // PUT: api/Attendances/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAttendance(int id, Attendance attendance)
+        public async Task<IActionResult> PutAttendance(int id, AttendanceDTO attendanceDto)
         {
-            if (id != attendance.Id)
+            if (id != attendanceDto.Id)
             {
                 return BadRequest();
             }
+
+            var attendance = await _context.attendances.FindAsync(id);
+            if (attendance == null)
+            {
+                return NotFound();
+            }
+
+            attendance.AttendanceName = attendanceDto.AttendanceName;
+            attendance.TrainingId = attendanceDto.TrainingId;
 
             _context.Entry(attendance).State = EntityState.Modified;
 
@@ -74,14 +125,61 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Attendances
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendance)
+        public async Task<ActionResult<AttendanceDTO>> PostAttendance(AttendanceDTO attendanceDto)
         {
+            var attendance = new Attendance
+            {
+                AttendanceName = attendanceDto.AttendanceName,
+                TrainingId = attendanceDto.TrainingId
+            };
+
             _context.attendances.Add(attendance);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAttendance", new { id = attendance.Id }, attendance);
+            attendanceDto.Id = attendance.Id;
+
+            return CreatedAtAction("GetAttendance", new { id = attendance.Id }, attendanceDto);
+        }
+
+        // POST: api/Attendances/5/AddTrainees
+        [HttpPost("{id}/AddTrainees")]
+        public async Task<IActionResult> AddTraineesToAttendance(int id, [FromBody] List<int> traineeIds)
+        {
+            var attendance = await _context.attendances
+                                           .Include(a => a.Trainee)
+                                           .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (attendance == null)
+            {
+                return NotFound(new { Message = "Attendance not found" });
+            }
+
+            var trainees = await _context.trainees
+                                         .Where(t => traineeIds.Contains(t.Id))
+                                         .ToListAsync();
+
+            if (trainees == null || !trainees.Any())
+            {
+                return NotFound(new { Message = "One or more trainees not found" });
+            }
+
+            if (attendance.Trainee == null)
+            {
+                attendance.Trainee = new List<Trainee>();
+            }
+
+            foreach (var trainee in trainees)
+            {
+                if (!attendance.Trainee.Contains(trainee))
+                {
+                    attendance.Trainee.Add(trainee);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         // DELETE: api/Attendances/5
