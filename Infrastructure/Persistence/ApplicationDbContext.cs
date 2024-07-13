@@ -52,6 +52,15 @@ namespace ImpactBackend.Infrastructure.Persistence
                     b => b.MigrationsAssembly("Impact.Api"));
             }
         }
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    base.OnModelCreating(modelBuilder);
+
+        //    modelBuilder.Entity<Training>()
+        //       .HasMany(t => t.Reservations)
+        //       .WithOne(r => r.Training)
+        //       .OnDelete(DeleteBehavior.NoAction);
+        //}
 
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

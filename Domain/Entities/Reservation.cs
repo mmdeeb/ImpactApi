@@ -4,8 +4,7 @@ namespace Domain.Entities;
 
 public class Reservation : BaseAuditableEntity
 {
-   // Reservation حجز
-    public Hall? Hall { get; set;} // القاعة الخاصة بالحجز
+    public Hall? Hall { get; set;}
     public int HallId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
@@ -13,6 +12,6 @@ public class Reservation : BaseAuditableEntity
     public double Cost { get; set; }
   
     
-    public Training? Training { get; set; } //  تدريب خاص بالحجز الواحد
-   // public int TrainingId { get; set; }
+    public Training? Training { get; set; } 
+    public int? TrainingId { get; set; } 
 }
