@@ -3,9 +3,8 @@
 namespace Domain.Entities;
 public class Client : User
 {
-    public List<Training>? Trainings { get; set; } = new List<Training>(); // الزبون لديه عدد من التدريبات
+    public List<Training>? Trainings { get; set; } = new List<Training>();
+    public int? ClientAccountId { get; set; }
 
-    public int? ClientAccountId { get; set; } // اجعل هذا المفتاح الأجنبي قابلاً للاحتواء على قيمة null
-
-    public ClientAccount? ClientAccount { get; set; } // الزبون لديه حساب مالي وحيد
+    public ClientAccount? ClientAccount { get; set; }
 }

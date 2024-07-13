@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,25 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> Getclients()
+        public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
-            return await _context.clients.ToListAsync();
+            var clients = await _context.clients.ToListAsync();
+
+            var clientDtos = clients.Select(client => new ClientDTO
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Email = client.Email,
+                PhoneNumber = client.PhoneNumber,
+                ClientAccountId = client.ClientAccountId
+            }).ToList();
+
+            return Ok(clientDtos);
         }
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+        public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
 
@@ -39,18 +51,37 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return client;
+            var clientDto = new ClientDTO
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Email = client.Email,
+                PhoneNumber = client.PhoneNumber,
+                ClientAccountId = client.ClientAccountId
+            };
+
+            return Ok(clientDto);
         }
 
         // PUT: api/Clients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(int id, Client client)
+        public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)
         {
-            if (id != client.Id)
+            if (id != clientDto.Id)
             {
                 return BadRequest();
             }
+
+            var client = await _context.clients.FindAsync(id);
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            client.Name = clientDto.Name;
+            client.Email = clientDto.Email;
+            client.PhoneNumber = clientDto.PhoneNumber;
+            client.ClientAccountId = clientDto.ClientAccountId;
 
             _context.Entry(client).State = EntityState.Modified;
 
@@ -74,14 +105,34 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Clients
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Client>> PostClient(Client client)
+        public async Task<ActionResult<ClientDTO>> PostClient(ClientDTO clientDto)
         {
+            var clientAccount = new ClientAccount
+            {
+                Discount = 0,
+                TotalBalance = 0,
+                Debt = 0
+            };
+
+            _context.clientAccounts.Add(clientAccount);
+            await _context.SaveChangesAsync();
+
+            var client = new Client
+            {
+                Name = clientDto.Name,
+                Email = clientDto.Email,
+                PhoneNumber = clientDto.PhoneNumber,
+                ClientAccountId = clientAccount.Id
+            };
+
             _context.clients.Add(client);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClient", new { id = client.Id }, client);
+            clientDto.Id = client.Id;
+            clientDto.ClientAccountId = client.ClientAccountId;
+
+            return CreatedAtAction("GetClient", new { id = client.Id }, clientDto);
         }
 
         // DELETE: api/Clients/5

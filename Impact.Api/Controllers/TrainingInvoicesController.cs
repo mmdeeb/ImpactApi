@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,29 @@ namespace Impact.Api.Controllers
 
         // GET: api/TrainingInvoices
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TrainingInvoice>>> GettrainingInvoices()
+        public async Task<ActionResult<IEnumerable<TrainingInvoiceDTO>>> GetTrainingInvoices()
         {
-            return await _context.trainingInvoices.ToListAsync();
+            var trainingInvoices = await _context.trainingInvoices.ToListAsync();
+
+            var trainingInvoiceDtos = trainingInvoices.Select(invoice => new TrainingInvoiceDTO
+            {
+                Id = invoice.Id,
+                MealsCost = invoice.MealsCost,
+                TrainerCost = invoice.TrainerCost,
+                PhotoInvoiceURL = invoice.PhotoInvoiceURL,
+                ReservationsCost = invoice.ReservationsCost,
+                TotalCost = invoice.TotalCost,
+                Discount = invoice.Discount,
+                FinalCost = invoice.FinalCost,
+                ClientAccountId = invoice.ClientAccountId
+            }).ToList();
+
+            return Ok(trainingInvoiceDtos);
         }
 
         // GET: api/TrainingInvoices/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<TrainingInvoice>> GetTrainingInvoice(int id)
+        public async Task<ActionResult<TrainingInvoiceDTO>> GetTrainingInvoice(int id)
         {
             var trainingInvoice = await _context.trainingInvoices.FindAsync(id);
 
@@ -39,18 +55,45 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return trainingInvoice;
+            var trainingInvoiceDto = new TrainingInvoiceDTO
+            {
+                Id = trainingInvoice.Id,
+                MealsCost = trainingInvoice.MealsCost,
+                TrainerCost = trainingInvoice.TrainerCost,
+                PhotoInvoiceURL = trainingInvoice.PhotoInvoiceURL,
+                ReservationsCost = trainingInvoice.ReservationsCost,
+                TotalCost = trainingInvoice.TotalCost,
+                Discount = trainingInvoice.Discount,
+                FinalCost = trainingInvoice.FinalCost,
+                ClientAccountId = trainingInvoice.ClientAccountId
+            };
+
+            return Ok(trainingInvoiceDto);
         }
 
         // PUT: api/TrainingInvoices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTrainingInvoice(int id, TrainingInvoice trainingInvoice)
+        public async Task<IActionResult> PutTrainingInvoice(int id, TrainingInvoiceDTO trainingInvoiceDto)
         {
-            if (id != trainingInvoice.Id)
+            if (id != trainingInvoiceDto.Id)
             {
                 return BadRequest();
             }
+
+            var trainingInvoice = await _context.trainingInvoices.FindAsync(id);
+            if (trainingInvoice == null)
+            {
+                return NotFound();
+            }
+
+            trainingInvoice.MealsCost = trainingInvoiceDto.MealsCost;
+            trainingInvoice.TrainerCost = trainingInvoiceDto.TrainerCost;
+            trainingInvoice.PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL;
+            trainingInvoice.ReservationsCost = trainingInvoiceDto.ReservationsCost;
+            trainingInvoice.TotalCost = trainingInvoiceDto.TotalCost;
+            trainingInvoice.Discount = trainingInvoiceDto.Discount;
+            trainingInvoice.FinalCost = trainingInvoiceDto.FinalCost;
+            trainingInvoice.ClientAccountId = trainingInvoiceDto.ClientAccountId;
 
             _context.Entry(trainingInvoice).State = EntityState.Modified;
 
@@ -72,16 +115,29 @@ namespace Impact.Api.Controllers
 
             return NoContent();
         }
-
+//يجب حذفها
         // POST: api/TrainingInvoices
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<TrainingInvoice>> PostTrainingInvoice(TrainingInvoice trainingInvoice)
+        public async Task<ActionResult<TrainingInvoiceDTO>> PostTrainingInvoice(TrainingInvoiceDTO trainingInvoiceDto)
         {
+            var trainingInvoice = new TrainingInvoice
+            {
+                MealsCost = trainingInvoiceDto.MealsCost,
+                TrainerCost = trainingInvoiceDto.TrainerCost,
+                PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL,
+                ReservationsCost = trainingInvoiceDto.ReservationsCost,
+                TotalCost = trainingInvoiceDto.TotalCost,
+                Discount = trainingInvoiceDto.Discount,
+                FinalCost = trainingInvoiceDto.FinalCost,
+                ClientAccountId = trainingInvoiceDto.ClientAccountId
+            };
+
             _context.trainingInvoices.Add(trainingInvoice);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTrainingInvoice", new { id = trainingInvoice.Id }, trainingInvoice);
+            trainingInvoiceDto.Id = trainingInvoice.Id;
+
+            return CreatedAtAction("GetTrainingInvoice", new { id = trainingInvoice.Id }, trainingInvoiceDto);
         }
 
         // DELETE: api/TrainingInvoices/5

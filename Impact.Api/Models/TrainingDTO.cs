@@ -6,6 +6,7 @@ public class TrainingDTO
     public string? TrainingName { get; set; }
     public int NumberOfStudents { get; set; }
     public string? TrainingDetails { get; set; }
+    public int ClientId { get; set; }  
     public int TrainingInvoiceId { get; set; }
-    public int ClientId { get; set; }
+
 }

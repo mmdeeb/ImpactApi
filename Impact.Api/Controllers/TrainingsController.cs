@@ -115,7 +115,7 @@ namespace Impact.Api.Controllers
 
             return Ok(trainingDto);
         }
-
+        // id الفاتورة والزبون لا تعدل
         // PUT: api/Trainings/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTraining(int id, TrainingDTO trainingDto)
@@ -134,8 +134,6 @@ namespace Impact.Api.Controllers
             training.TrainingName = trainingDto.TrainingName;
             training.NumberOfStudents = trainingDto.NumberOfStudents;
             training.TrainingDetails = trainingDto.TrainingDetails;
-            training.TrainingInvoiceId = trainingDto.TrainingInvoiceId;
-            training.ClientId = trainingDto.ClientId;
 
             _context.Entry(training).State = EntityState.Modified;
 
@@ -162,12 +160,36 @@ namespace Impact.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<TrainingDTO>> PostTraining(TrainingDTO trainingDto)
         {
+            // تحقق من وجود العميل
+            var client = await _context.clients.FindAsync(trainingDto.ClientId);
+            if (client == null)
+            {
+                return BadRequest(new { Message = "Client not found" });
+            }
+
+            // إنشاء فاتورة تدريب جديدة بقيم صفرية
+            var trainingInvoice = new TrainingInvoice
+            {
+                MealsCost = 0,
+                TrainerCost = 0,
+                PhotoInvoiceURL = null,
+                ReservationsCost = 0,
+                TotalCost = 0,
+                Discount = 0,
+                FinalCost = 0,
+                ClientAccountId = client.ClientAccountId
+            };
+
+            _context.trainingInvoices.Add(trainingInvoice);
+            await _context.SaveChangesAsync();
+
+            // إنشاء التدريب وربط فاتورة التدريب الجديدة به
             var training = new Training
             {
                 TrainingName = trainingDto.TrainingName,
                 NumberOfStudents = trainingDto.NumberOfStudents,
                 TrainingDetails = trainingDto.TrainingDetails,
-                TrainingInvoiceId = trainingDto.TrainingInvoiceId,
+                TrainingInvoiceId = trainingInvoice.Id,
                 ClientId = trainingDto.ClientId
             };
 
@@ -175,6 +197,7 @@ namespace Impact.Api.Controllers
             await _context.SaveChangesAsync();
 
             trainingDto.Id = training.Id;
+            trainingDto.TrainingInvoiceId = trainingInvoice.Id;
 
             return CreatedAtAction("GetTraining", new { id = training.Id }, trainingDto);
         }

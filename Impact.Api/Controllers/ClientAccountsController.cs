@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,24 @@ namespace Impact.Api.Controllers
 
         // GET: api/ClientAccounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClientAccount>>> GetclientAccounts()
+        public async Task<ActionResult<IEnumerable<ClientAccountDTO>>> GetClientAccounts()
         {
-            return await _context.clientAccounts.ToListAsync();
+            var clientAccounts = await _context.clientAccounts.ToListAsync();
+
+            var clientAccountDtos = clientAccounts.Select(clientAccount => new ClientAccountDTO
+            {
+                Id = clientAccount.Id,
+                Discount = clientAccount.Discount,
+                TotalBalance = clientAccount.TotalBalance,
+                Debt = clientAccount.Debt
+            }).ToList();
+
+            return Ok(clientAccountDtos);
         }
 
         // GET: api/ClientAccounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClientAccount>> GetClientAccount(int id)
+        public async Task<ActionResult<ClientAccountDTO>> GetClientAccount(int id)
         {
             var clientAccount = await _context.clientAccounts.FindAsync(id);
 
@@ -39,18 +50,35 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return clientAccount;
+            var clientAccountDto = new ClientAccountDTO
+            {
+                Id = clientAccount.Id,
+                Discount = clientAccount.Discount,
+                TotalBalance = clientAccount.TotalBalance,
+                Debt = clientAccount.Debt
+            };
+
+            return Ok(clientAccountDto);
         }
 
         // PUT: api/ClientAccounts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutClientAccount(int id, ClientAccount clientAccount)
+        public async Task<IActionResult> PutClientAccount(int id, ClientAccountDTO clientAccountDto)
         {
-            if (id != clientAccount.Id)
+            if (id != clientAccountDto.Id)
             {
                 return BadRequest();
             }
+
+            var clientAccount = await _context.clientAccounts.FindAsync(id);
+            if (clientAccount == null)
+            {
+                return NotFound();
+            }
+
+            clientAccount.Discount = clientAccountDto.Discount;
+            clientAccount.TotalBalance = clientAccountDto.TotalBalance;
+            clientAccount.Debt = clientAccountDto.Debt;
 
             _context.Entry(clientAccount).State = EntityState.Modified;
 
@@ -74,14 +102,22 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/ClientAccounts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ClientAccount>> PostClientAccount(ClientAccount clientAccount)
+        public async Task<ActionResult<ClientAccountDTO>> PostClientAccount(ClientAccountDTO clientAccountDto)
         {
+            var clientAccount = new ClientAccount
+            {
+                Discount = clientAccountDto.Discount,
+                TotalBalance = clientAccountDto.TotalBalance,
+                Debt = clientAccountDto.Debt
+            };
+
             _context.clientAccounts.Add(clientAccount);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClientAccount", new { id = clientAccount.Id }, clientAccount);
+            clientAccountDto.Id = clientAccount.Id;
+
+            return CreatedAtAction("GetClientAccount", new { id = clientAccount.Id }, clientAccountDto);
         }
 
         // DELETE: api/ClientAccounts/5
