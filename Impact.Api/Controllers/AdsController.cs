@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,25 @@ namespace Impact.Api.Controllers
 
         // GET: api/Ads
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ads>>> Getads()
+        public async Task<ActionResult<IEnumerable<AdsDTO>>> GetAds()
         {
-            return await _context.ads.ToListAsync();
+            var adsList = await _context.ads.ToListAsync();
+
+            var adsDtos = adsList.Select(ad => new AdsDTO
+            {
+                Id = ad.Id,
+                ListAdsMedia = ad.ListAdsMedia,
+                AdsTitle = ad.AdsTitle,
+                AdsDescription = ad.AdsDescription,
+                AdsLink = ad.AdsLink
+            }).ToList();
+
+            return Ok(adsDtos);
         }
 
         // GET: api/Ads/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Ads>> GetAds(int id)
+        public async Task<ActionResult<AdsDTO>> GetAds(int id)
         {
             var ads = await _context.ads.FindAsync(id);
 
@@ -39,18 +51,37 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return ads;
+            var adsDto = new AdsDTO
+            {
+                Id = ads.Id,
+                ListAdsMedia = ads.ListAdsMedia,
+                AdsTitle = ads.AdsTitle,
+                AdsDescription = ads.AdsDescription,
+                AdsLink = ads.AdsLink
+            };
+
+            return Ok(adsDto);
         }
 
         // PUT: api/Ads/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAds(int id, Ads ads)
+        public async Task<IActionResult> PutAds(int id, AdsDTO adsDto)
         {
-            if (id != ads.Id)
+            if (id != adsDto.Id)
             {
                 return BadRequest();
             }
+
+            var ads = await _context.ads.FindAsync(id);
+            if (ads == null)
+            {
+                return NotFound();
+            }
+
+            ads.ListAdsMedia = adsDto.ListAdsMedia;
+            ads.AdsTitle = adsDto.AdsTitle;
+            ads.AdsDescription = adsDto.AdsDescription;
+            ads.AdsLink = adsDto.AdsLink;
 
             _context.Entry(ads).State = EntityState.Modified;
 
@@ -74,14 +105,23 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Ads
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Ads>> PostAds(Ads ads)
+        public async Task<ActionResult<AdsDTO>> PostAds(AdsDTO adsDto)
         {
+            var ads = new Ads
+            {
+                ListAdsMedia = adsDto.ListAdsMedia,
+                AdsTitle = adsDto.AdsTitle,
+                AdsDescription = adsDto.AdsDescription,
+                AdsLink = adsDto.AdsLink
+            };
+
             _context.ads.Add(ads);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAds", new { id = ads.Id }, ads);
+            adsDto.Id = ads.Id;
+
+            return CreatedAtAction("GetAds", new { id = ads.Id }, adsDto);
         }
 
         // DELETE: api/Ads/5
