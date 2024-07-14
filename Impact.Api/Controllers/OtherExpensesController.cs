@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,36 +24,99 @@ namespace Impact.Api.Controllers
 
         // GET: api/OtherExpenses
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OtherExpenses>>> GetotherExpenses()
+        public async Task<ActionResult<IEnumerable<OtherExpensesDTO>>> GetOtherExpenses()
         {
-            return await _context.otherExpenses.ToListAsync();
+            var expenses = await _context.otherExpenses.ToListAsync();
+
+            var expensesDtos = expenses.Select(expense => new OtherExpensesDTO
+            {
+                Id = expense.Id,
+                Description = expense.Description,
+                PhotoInvoiceURL = expense.PhotoInvoiceURL,
+                Date = expense.Date,
+                Amount = expense.Amount,
+                EmployeeName = expense.EmployeeName,
+                CenterId = expense.CenterId
+            }).ToList();
+
+            return Ok(expensesDtos);
         }
 
         // GET: api/OtherExpenses/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<OtherExpenses>> GetOtherExpenses(int id)
+        public async Task<ActionResult<OtherExpensesDTO>> GetOtherExpense(int id)
         {
-            var otherExpenses = await _context.otherExpenses.FindAsync(id);
+            var expense = await _context.otherExpenses.FindAsync(id);
 
-            if (otherExpenses == null)
+            if (expense == null)
             {
                 return NotFound();
             }
 
-            return otherExpenses;
+            var expenseDto = new OtherExpensesDTO
+            {
+                Id = expense.Id,
+                Description = expense.Description,
+                PhotoInvoiceURL = expense.PhotoInvoiceURL,
+                Date = expense.Date,
+                Amount = expense.Amount,
+                EmployeeName = expense.EmployeeName,
+                CenterId = expense.CenterId
+            };
+
+            return Ok(expenseDto);
+        }
+
+        // GET: api/OtherExpenses/ByCenter/5
+        [HttpGet("ByCenter/{centerId}")]
+        public async Task<ActionResult<IEnumerable<OtherExpensesDTO>>> GetOtherExpensesByCenter(int centerId)
+        {
+            var expenses = await _context.otherExpenses
+                                         .Where(e => e.CenterId == centerId)
+                                         .ToListAsync();
+
+            if (!expenses.Any())
+            {
+                return NotFound();
+            }
+
+            var expensesDtos = expenses.Select(expense => new OtherExpensesDTO
+            {
+                Id = expense.Id,
+                Description = expense.Description,
+                PhotoInvoiceURL = expense.PhotoInvoiceURL,
+                Date = expense.Date,
+                Amount = expense.Amount,
+                EmployeeName = expense.EmployeeName,
+                CenterId = expense.CenterId
+            }).ToList();
+
+            return Ok(expensesDtos);
         }
 
         // PUT: api/OtherExpenses/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOtherExpenses(int id, OtherExpenses otherExpenses)
+        public async Task<IActionResult> PutOtherExpense(int id, OtherExpensesDTO expenseDto)
         {
-            if (id != otherExpenses.Id)
+            if (id != expenseDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(otherExpenses).State = EntityState.Modified;
+            var expense = await _context.otherExpenses.FindAsync(id);
+            if (expense == null)
+            {
+                return NotFound();
+            }
+
+            expense.Description = expenseDto.Description;
+            expense.PhotoInvoiceURL = expenseDto.PhotoInvoiceURL;
+            expense.Date = expenseDto.Date;
+            expense.Amount = expenseDto.Amount;
+            expense.EmployeeName = expenseDto.EmployeeName;
+            expense.CenterId = expenseDto.CenterId;
+
+            _context.Entry(expense).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +124,7 @@ namespace Impact.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OtherExpensesExists(id))
+                if (!OtherExpenseExists(id))
                 {
                     return NotFound();
                 }
@@ -74,33 +138,44 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/OtherExpenses
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<OtherExpenses>> PostOtherExpenses(OtherExpenses otherExpenses)
+        public async Task<ActionResult<OtherExpensesDTO>> PostOtherExpense(OtherExpensesDTO expenseDto)
         {
-            _context.otherExpenses.Add(otherExpenses);
+            var expense = new OtherExpenses
+            {
+                Description = expenseDto.Description,
+                PhotoInvoiceURL = expenseDto.PhotoInvoiceURL,
+                Date = expenseDto.Date,
+                Amount = expenseDto.Amount,
+                EmployeeName = expenseDto.EmployeeName,
+                CenterId = expenseDto.CenterId
+            };
+
+            _context.otherExpenses.Add(expense);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOtherExpenses", new { id = otherExpenses.Id }, otherExpenses);
+            expenseDto.Id = expense.Id;
+
+            return CreatedAtAction("GetOtherExpense", new { id = expense.Id }, expenseDto);
         }
 
         // DELETE: api/OtherExpenses/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOtherExpenses(int id)
+        public async Task<IActionResult> DeleteOtherExpense(int id)
         {
-            var otherExpenses = await _context.otherExpenses.FindAsync(id);
-            if (otherExpenses == null)
+            var expense = await _context.otherExpenses.FindAsync(id);
+            if (expense == null)
             {
                 return NotFound();
             }
 
-            _context.otherExpenses.Remove(otherExpenses);
+            _context.otherExpenses.Remove(expense);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool OtherExpensesExists(int id)
+        private bool OtherExpenseExists(int id)
         {
             return _context.otherExpenses.Any(e => e.Id == id);
         }

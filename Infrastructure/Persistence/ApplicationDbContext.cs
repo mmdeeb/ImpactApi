@@ -27,7 +27,6 @@ namespace ImpactBackend.Infrastructure.Persistence
         public DbSet<ReceiptToRestaurant> receiptsToRestaurant { get; set; }
         public DbSet<Receipt> receipts { get; set; }
         public DbSet<Hall> halls { get; set; }
-        public DbSet<LogisticCost> logisticCosts { get; set; }
         public DbSet<Mail> mails { get; set; }
         public DbSet<Reservation> reservations { get; set; }
         public DbSet<FinancialFund> financialFunds { get; set; }
