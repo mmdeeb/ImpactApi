@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,52 @@ namespace Impact.Api.Controllers
 
         // GET: api/AdditionalCosts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AdditionalCost>>> GetadditionalCosts()
+        public async Task<ActionResult<IEnumerable<AdditionalCostDTO>>> GetAdditionalCosts()
         {
-            return await _context.additionalCosts.ToListAsync();
+            var additionalCosts = await _context.additionalCosts.ToListAsync();
+
+            var additionalCostDtos = additionalCosts.Select(additionalCost => new AdditionalCostDTO
+            {
+                Id = additionalCost.Id,
+                Cost = additionalCost.Cost,
+                Detailes = additionalCost.Detailes,
+                Date = additionalCost.Date,
+                PhotoInvoiceURL = additionalCost.PhotoInvoiceURL,
+                TrainingInvoiceId = additionalCost.TrainingInvoiceId
+            }).ToList();
+
+            return Ok(additionalCostDtos);
+        }
+
+        // GET: api/AdditionalCosts/ByInvoice/5
+        [HttpGet("ByInvoice/{trainingInvoiceId}")]
+        public async Task<ActionResult<IEnumerable<AdditionalCostDTO>>> GetAdditionalCostsByInvoice(int trainingInvoiceId)
+        {
+            var additionalCosts = await _context.additionalCosts
+                                                .Where(ac => ac.TrainingInvoiceId == trainingInvoiceId)
+                                                .ToListAsync();
+
+            if (!additionalCosts.Any())
+            {
+                return NotFound();
+            }
+
+            var additionalCostDtos = additionalCosts.Select(additionalCost => new AdditionalCostDTO
+            {
+                Id = additionalCost.Id,
+                Cost = additionalCost.Cost,
+                Detailes = additionalCost.Detailes,
+                Date = additionalCost.Date,
+                PhotoInvoiceURL = additionalCost.PhotoInvoiceURL,
+                TrainingInvoiceId = additionalCost.TrainingInvoiceId
+            }).ToList();
+
+            return Ok(additionalCostDtos);
         }
 
         // GET: api/AdditionalCosts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<AdditionalCost>> GetAdditionalCost(int id)
+        public async Task<ActionResult<AdditionalCostDTO>> GetAdditionalCost(int id)
         {
             var additionalCost = await _context.additionalCosts.FindAsync(id);
 
@@ -39,24 +78,66 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return additionalCost;
+            var additionalCostDto = new AdditionalCostDTO
+            {
+                Id = additionalCost.Id,
+                Cost = additionalCost.Cost,
+                Detailes = additionalCost.Detailes,
+                Date = additionalCost.Date,
+                PhotoInvoiceURL = additionalCost.PhotoInvoiceURL,
+                TrainingInvoiceId = additionalCost.TrainingInvoiceId
+            };
+
+            return Ok(additionalCostDto);
         }
 
         // PUT: api/AdditionalCosts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAdditionalCost(int id, AdditionalCost additionalCost)
+        public async Task<IActionResult> PutAdditionalCost(int id, AdditionalCostDTO additionalCostDto)
         {
-            if (id != additionalCost.Id)
+            if (id != additionalCostDto.Id)
             {
                 return BadRequest();
             }
+
+            var additionalCost = await _context.additionalCosts.FindAsync(id);
+            if (additionalCost == null)
+            {
+                return NotFound();
+            }
+
+            var previousCost = additionalCost.Cost;
+
+            additionalCost.Cost = additionalCostDto.Cost;
+            additionalCost.Detailes = additionalCostDto.Detailes;
+            additionalCost.Date = additionalCostDto.Date;
+            additionalCost.PhotoInvoiceURL = additionalCostDto.PhotoInvoiceURL;
+            additionalCost.TrainingInvoiceId = additionalCostDto.TrainingInvoiceId;
 
             _context.Entry(additionalCost).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                var trainingInvoice = await _context.trainingInvoices.FirstOrDefaultAsync(ti => ti.Id == additionalCost.TrainingInvoiceId);
+                if (trainingInvoice != null)
+                {
+                    trainingInvoice.AllAdditionalCosts -= previousCost;
+                    trainingInvoice.AllAdditionalCosts += additionalCost.Cost;
+                    trainingInvoice.TotalCost -= previousCost;
+                    trainingInvoice.TotalCost += additionalCost.Cost;
+                    var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                    if (ClientAccount != null)
+                    {
+                        ClientAccount.TotalBalance -= previousCost;
+                        ClientAccount.TotalBalance += additionalCost.Cost;
+                        _context.Entry(ClientAccount).State = EntityState.Modified;
+
+                    }
+                    _context.Entry(trainingInvoice).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -74,14 +155,40 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/AdditionalCosts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<AdditionalCost>> PostAdditionalCost(AdditionalCost additionalCost)
+        public async Task<ActionResult<AdditionalCostDTO>> PostAdditionalCost(AdditionalCostDTO additionalCostDto)
         {
+            var additionalCost = new AdditionalCost
+            {
+                Cost = additionalCostDto.Cost,
+                Detailes = additionalCostDto.Detailes,
+                Date = additionalCostDto.Date,
+                PhotoInvoiceURL = additionalCostDto.PhotoInvoiceURL,
+                TrainingInvoiceId = additionalCostDto.TrainingInvoiceId
+            };
+
             _context.additionalCosts.Add(additionalCost);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAdditionalCost", new { id = additionalCost.Id }, additionalCost);
+            var trainingInvoice = await _context.trainingInvoices.FirstOrDefaultAsync(ti => ti.Id == additionalCost.TrainingInvoiceId);
+            if (trainingInvoice != null)
+            {
+                trainingInvoice.AllAdditionalCosts += additionalCost.Cost;
+                trainingInvoice.TotalCost += additionalCost.Cost;
+                var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                if (ClientAccount != null)
+                {
+                    ClientAccount.TotalBalance += additionalCost.Cost;
+                    _context.Entry(ClientAccount).State = EntityState.Modified;
+
+                }
+                _context.Entry(trainingInvoice).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            additionalCostDto.Id = additionalCost.Id;
+
+            return CreatedAtAction("GetAdditionalCost", new { id = additionalCost.Id }, additionalCostDto);
         }
 
         // DELETE: api/AdditionalCosts/5
@@ -94,8 +201,26 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
+            var cost = additionalCost.Cost;
+            var trainingInvoice = await _context.trainingInvoices.FirstOrDefaultAsync(ti => ti.Id == additionalCost.TrainingInvoiceId);
+
             _context.additionalCosts.Remove(additionalCost);
             await _context.SaveChangesAsync();
+
+            if (trainingInvoice != null)
+            {
+                trainingInvoice.AllAdditionalCosts -= cost;
+                trainingInvoice.TotalCost -= cost;
+                var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                if (ClientAccount != null)
+                {
+                    ClientAccount.TotalBalance -= additionalCost.Cost;
+                    _context.Entry(ClientAccount).State = EntityState.Modified;
+
+                }
+                _context.Entry(trainingInvoice).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
 
             return NoContent();
         }

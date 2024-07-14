@@ -35,6 +35,7 @@ namespace Impact.Api.Controllers
                 TrainerCost = invoice.TrainerCost,
                 PhotoInvoiceURL = invoice.PhotoInvoiceURL,
                 ReservationsCost = invoice.ReservationsCost,
+                AllAdditionalCosts=invoice.AllAdditionalCosts,
                 TotalCost = invoice.TotalCost,
                 Discount = invoice.Discount,
                 FinalCost = invoice.FinalCost,
@@ -62,6 +63,7 @@ namespace Impact.Api.Controllers
                 TrainerCost = trainingInvoice.TrainerCost,
                 PhotoInvoiceURL = trainingInvoice.PhotoInvoiceURL,
                 ReservationsCost = trainingInvoice.ReservationsCost,
+                AllAdditionalCosts = trainingInvoice.AllAdditionalCosts,
                 TotalCost = trainingInvoice.TotalCost,
                 Discount = trainingInvoice.Discount,
                 FinalCost = trainingInvoice.FinalCost,
@@ -90,6 +92,7 @@ namespace Impact.Api.Controllers
             trainingInvoice.TrainerCost = trainingInvoiceDto.TrainerCost;
             trainingInvoice.PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL;
             trainingInvoice.ReservationsCost = trainingInvoiceDto.ReservationsCost;
+            trainingInvoice.AllAdditionalCosts= trainingInvoiceDto.AllAdditionalCosts;
             trainingInvoice.TotalCost = trainingInvoiceDto.TotalCost;
             trainingInvoice.Discount = trainingInvoiceDto.Discount;
             trainingInvoice.FinalCost = trainingInvoiceDto.FinalCost;
@@ -126,6 +129,7 @@ namespace Impact.Api.Controllers
                 TrainerCost = trainingInvoiceDto.TrainerCost,
                 PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL,
                 ReservationsCost = trainingInvoiceDto.ReservationsCost,
+                AllAdditionalCosts = trainingInvoiceDto.AllAdditionalCosts,
                 TotalCost = trainingInvoiceDto.TotalCost,
                 Discount = trainingInvoiceDto.Discount,
                 FinalCost = trainingInvoiceDto.FinalCost,
