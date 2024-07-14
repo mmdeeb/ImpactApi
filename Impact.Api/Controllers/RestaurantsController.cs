@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,24 @@ namespace Impact.Api.Controllers
 
         // GET: api/Restaurants
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Restaurant>>> Getrestaurants()
+        public async Task<ActionResult<IEnumerable<RestaurantDTO>>> GetRestaurants()
         {
-            return await _context.restaurants.ToListAsync();
+            var restaurants = await _context.restaurants.ToListAsync();
+
+            var restaurantDtos = restaurants.Select(restaurant => new RestaurantDTO
+            {
+                Id = restaurant.Id,
+                RestaurantName = restaurant.RestaurantName,
+                PhoneNumber = restaurant.PhoneNumber,
+                RestaurantAccountId = restaurant.RestaurantAccountId
+            }).ToList();
+
+            return Ok(restaurantDtos);
         }
 
         // GET: api/Restaurants/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Restaurant>> GetRestaurant(int id)
+        public async Task<ActionResult<RestaurantDTO>> GetRestaurant(int id)
         {
             var restaurant = await _context.restaurants.FindAsync(id);
 
@@ -39,18 +50,35 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return restaurant;
+            var restaurantDto = new RestaurantDTO
+            {
+                Id = restaurant.Id,
+                RestaurantName = restaurant.RestaurantName,
+                PhoneNumber = restaurant.PhoneNumber,
+                RestaurantAccountId = restaurant.RestaurantAccountId
+            };
+
+            return Ok(restaurantDto);
         }
 
         // PUT: api/Restaurants/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRestaurant(int id, Restaurant restaurant)
+        public async Task<IActionResult> PutRestaurant(int id, RestaurantDTO restaurantDto)
         {
-            if (id != restaurant.Id)
+            if (id != restaurantDto.Id)
             {
                 return BadRequest();
             }
+
+            var restaurant = await _context.restaurants.FindAsync(id);
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+
+            restaurant.RestaurantName = restaurantDto.RestaurantName;
+            restaurant.PhoneNumber = restaurantDto.PhoneNumber;
+            restaurant.RestaurantAccountId = restaurantDto.RestaurantAccountId;
 
             _context.Entry(restaurant).State = EntityState.Modified;
 
@@ -74,14 +102,32 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/Restaurants
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Restaurant>> PostRestaurant(Restaurant restaurant)
+        public async Task<ActionResult<RestaurantDTO>> PostRestaurant(RestaurantDTO restaurantDto)
         {
+          
+            var restaurantAccount = new RestaurantAccount
+            {
+                TotalBalance = 0,
+                Debt = 0
+            };
+            
+            _context.restaurantAccounts.Add(restaurantAccount);
+            await _context.SaveChangesAsync();
+
+            var restaurant = new Restaurant
+            {
+                RestaurantName = restaurantDto.RestaurantName,
+                PhoneNumber = restaurantDto.PhoneNumber,
+                RestaurantAccountId = restaurantAccount.Id
+            };
+           
             _context.restaurants.Add(restaurant);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRestaurant", new { id = restaurant.Id }, restaurant);
+            restaurantDto.Id = restaurant.Id;
+
+            return CreatedAtAction("GetRestaurant", new { id = restaurant.Id }, restaurantDto);
         }
 
         // DELETE: api/Restaurants/5

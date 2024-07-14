@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -23,14 +24,24 @@ namespace Impact.Api.Controllers
 
         // GET: api/RestaurantAccounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RestaurantAccount>>> GetrestaurantAccounts()
+        public async Task<ActionResult<IEnumerable<RestaurantAccountDTO>>> GetRestaurantAccounts()
         {
-            return await _context.restaurantAccounts.ToListAsync();
+            var restaurantAccounts = await _context.restaurantAccounts.ToListAsync();
+
+            var restaurantAccountDtos = restaurantAccounts.Select(account => new RestaurantAccountDTO
+            {
+                Id = account.Id,
+                TotalBalance = account.TotalBalance,
+                Debt = account.Debt,
+                RestaurantId = account.Restaurant.Id
+            }).ToList();
+
+            return Ok(restaurantAccountDtos);
         }
 
         // GET: api/RestaurantAccounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<RestaurantAccount>> GetRestaurantAccount(int id)
+        public async Task<ActionResult<RestaurantAccountDTO>> GetRestaurantAccount(int id)
         {
             var restaurantAccount = await _context.restaurantAccounts.FindAsync(id);
 
@@ -39,18 +50,34 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            return restaurantAccount;
+            var restaurantAccountDto = new RestaurantAccountDTO
+            {
+                Id = restaurantAccount.Id,
+                TotalBalance = restaurantAccount.TotalBalance,
+                Debt = restaurantAccount.Debt,
+                RestaurantId = restaurantAccount.Restaurant.Id
+            };
+
+            return Ok(restaurantAccountDto);
         }
 
         // PUT: api/RestaurantAccounts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRestaurantAccount(int id, RestaurantAccount restaurantAccount)
+        public async Task<IActionResult> PutRestaurantAccount(int id, RestaurantAccountDTO restaurantAccountDto)
         {
-            if (id != restaurantAccount.Id)
+            if (id != restaurantAccountDto.Id)
             {
                 return BadRequest();
             }
+
+            var restaurantAccount = await _context.restaurantAccounts.FindAsync(id);
+            if (restaurantAccount == null)
+            {
+                return NotFound();
+            }
+
+            restaurantAccount.TotalBalance = restaurantAccountDto.TotalBalance;
+            restaurantAccount.Debt = restaurantAccountDto.Debt;
 
             _context.Entry(restaurantAccount).State = EntityState.Modified;
 
@@ -74,14 +101,21 @@ namespace Impact.Api.Controllers
         }
 
         // POST: api/RestaurantAccounts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<RestaurantAccount>> PostRestaurantAccount(RestaurantAccount restaurantAccount)
+        public async Task<ActionResult<RestaurantAccountDTO>> PostRestaurantAccount(RestaurantAccountDTO restaurantAccountDto)
         {
+            var restaurantAccount = new RestaurantAccount
+            {
+                TotalBalance = restaurantAccountDto.TotalBalance,
+                Debt = restaurantAccountDto.Debt,
+            };
+
             _context.restaurantAccounts.Add(restaurantAccount);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRestaurantAccount", new { id = restaurantAccount.Id }, restaurantAccount);
+            restaurantAccountDto.Id = restaurantAccount.Id;
+
+            return CreatedAtAction("GetRestaurantAccount", new { id = restaurantAccount.Id }, restaurantAccountDto);
         }
 
         // DELETE: api/RestaurantAccounts/5
