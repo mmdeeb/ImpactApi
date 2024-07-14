@@ -125,6 +125,9 @@ namespace Impact.Api.Controllers
                 {
                     employeeAccount.Debt += previousAmount; // Revert previous amount
                     employeeAccount.Debt -= receipt.Amount; // Apply new amount
+                    employeeAccount.TotalBalance -= previousAmount; // Revert previous amount
+                    employeeAccount.Debt += receipt.Amount; // Apply new amount
+
                     _context.Entry(employeeAccount).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
@@ -164,6 +167,7 @@ namespace Impact.Api.Controllers
             if (employeeAccount != null)
             {
                 employeeAccount.Debt -= receipt.Amount;
+                employeeAccount.TotalBalance += receipt.Amount;
                 _context.Entry(employeeAccount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
@@ -192,6 +196,7 @@ namespace Impact.Api.Controllers
             if (employeeAccount != null)
             {
                 employeeAccount.Debt += amount;
+                employeeAccount.TotalBalance -= amount;
                 _context.Entry(employeeAccount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }

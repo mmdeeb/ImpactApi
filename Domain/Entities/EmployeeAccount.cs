@@ -12,7 +12,6 @@ namespace Domain.Entities
     {
         public Employee? Employee { get; set; }
 
-        public double Salary { get; set; }
         public double? Deduct { get; set; }
         public double? AdvancePayment { get; set; }
         public double? Reward { get; set; }
