@@ -115,7 +115,7 @@ namespace Impact.Api.Controllers
 
             return Ok(trainingDto);
         }
-        // id الفاتورة والزبون لا تعدل
+ 
         // PUT: api/Trainings/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTraining(int id, TrainingDTO trainingDto)

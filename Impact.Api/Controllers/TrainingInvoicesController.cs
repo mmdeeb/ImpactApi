@@ -28,19 +28,31 @@ namespace Impact.Api.Controllers
         {
             var trainingInvoices = await _context.trainingInvoices.ToListAsync();
 
-            var trainingInvoiceDtos = trainingInvoices.Select(invoice => new TrainingInvoiceDTO
+            var trainingInvoiceDtos = trainingInvoices.Select(invoice =>
             {
-                Id = invoice.Id,
-                MealsCost = invoice.MealsCost,
-                TrainerCost = invoice.TrainerCost,
-                PhotoInvoiceURL = invoice.PhotoInvoiceURL,
-                ReservationsCost = invoice.ReservationsCost,
-                AllAdditionalCosts=invoice.AllAdditionalCosts,
-                TotalCost = invoice.TotalCost,
-                Discount = invoice.Discount,
-                FinalCost = invoice.FinalCost,
-                ClientAccountId = invoice.ClientAccountId
+                double calculatedFinalCost = invoice.TotalCost - invoice.Discount;
+                if (invoice.FinalCost != calculatedFinalCost)
+                {
+                    invoice.FinalCost = calculatedFinalCost;
+                    _context.Entry(invoice).State = EntityState.Modified;
+                }
+
+                return new TrainingInvoiceDTO
+                {
+                    Id = invoice.Id,
+                    MealsCost = invoice.MealsCost,
+                    TrainerCost = invoice.TrainerCost,
+                    PhotoInvoiceURL = invoice.PhotoInvoiceURL,
+                    ReservationsCost = invoice.ReservationsCost,
+                    AllAdditionalCosts = invoice.AllAdditionalCosts,
+                    TotalCost = invoice.TotalCost,
+                    Discount = invoice.Discount,
+                    FinalCost = invoice.FinalCost,
+                    ClientAccountId = invoice.ClientAccountId
+                };
             }).ToList();
+
+            await _context.SaveChangesAsync(); // Save changes to FinalCost if updated
 
             return Ok(trainingInvoiceDtos);
         }
@@ -54,6 +66,14 @@ namespace Impact.Api.Controllers
             if (trainingInvoice == null)
             {
                 return NotFound();
+            }
+
+            double calculatedFinalCost = trainingInvoice.TotalCost - trainingInvoice.Discount;
+            if (trainingInvoice.FinalCost != calculatedFinalCost)
+            {
+                trainingInvoice.FinalCost = calculatedFinalCost;
+                _context.Entry(trainingInvoice).State = EntityState.Modified;
+                await _context.SaveChangesAsync(); // Save changes to FinalCost if updated
             }
 
             var trainingInvoiceDto = new TrainingInvoiceDTO
@@ -92,12 +112,11 @@ namespace Impact.Api.Controllers
             trainingInvoice.TrainerCost = trainingInvoiceDto.TrainerCost;
             trainingInvoice.PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL;
             trainingInvoice.ReservationsCost = trainingInvoiceDto.ReservationsCost;
-            trainingInvoice.AllAdditionalCosts= trainingInvoiceDto.AllAdditionalCosts;
+            trainingInvoice.AllAdditionalCosts = trainingInvoiceDto.AllAdditionalCosts;
             trainingInvoice.TotalCost = trainingInvoiceDto.TotalCost;
             trainingInvoice.Discount = trainingInvoiceDto.Discount;
-            trainingInvoice.FinalCost = trainingInvoiceDto.FinalCost;
-            trainingInvoice.ClientAccountId = trainingInvoiceDto.ClientAccountId;
-
+            trainingInvoice.FinalCost = trainingInvoice.TotalCost - trainingInvoiceDto.Discount;  
+            
             _context.Entry(trainingInvoice).State = EntityState.Modified;
 
             try
@@ -118,30 +137,24 @@ namespace Impact.Api.Controllers
 
             return NoContent();
         }
-//يجب حذفها
-        // POST: api/TrainingInvoices
-        [HttpPost]
-        public async Task<ActionResult<TrainingInvoiceDTO>> PostTrainingInvoice(TrainingInvoiceDTO trainingInvoiceDto)
+
+        // PATCH: api/TrainingInvoices/UpdateDiscount/5
+        [HttpPatch("UpdateDiscount/{id}")]
+        public async Task<IActionResult> UpdateDiscount(int id, [FromBody] double discount)
         {
-            var trainingInvoice = new TrainingInvoice
+            var trainingInvoice = await _context.trainingInvoices.FindAsync(id);
+            if (trainingInvoice == null)
             {
-                MealsCost = trainingInvoiceDto.MealsCost,
-                TrainerCost = trainingInvoiceDto.TrainerCost,
-                PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL,
-                ReservationsCost = trainingInvoiceDto.ReservationsCost,
-                AllAdditionalCosts = trainingInvoiceDto.AllAdditionalCosts,
-                TotalCost = trainingInvoiceDto.TotalCost,
-                Discount = trainingInvoiceDto.Discount,
-                FinalCost = trainingInvoiceDto.FinalCost,
-                ClientAccountId = trainingInvoiceDto.ClientAccountId
-            };
+                return NotFound();
+            }
 
-            _context.trainingInvoices.Add(trainingInvoice);
+            trainingInvoice.Discount = discount;
+            trainingInvoice.FinalCost = trainingInvoice.TotalCost - discount;
+            
+            _context.Entry(trainingInvoice).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-
-            trainingInvoiceDto.Id = trainingInvoice.Id;
-
-            return CreatedAtAction("GetTrainingInvoice", new { id = trainingInvoice.Id }, trainingInvoiceDto);
+            
+            return NoContent();
         }
 
         // DELETE: api/TrainingInvoices/5
