@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Impact.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240714162307_t4")]
-    partial class t4
+    [Migration("20240714200249_t9")]
+    partial class t9
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -423,10 +423,10 @@ namespace Impact.Api.Migrations
                     b.Property<double>("MailPriceForORG")
                         .HasColumnType("float");
 
-                    b.Property<string>("Number")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
 
-                    b.Property<int?>("RestaurantAccountId")
+                    b.Property<int>("RestaurantAccountId")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalPrice")
@@ -607,7 +607,7 @@ namespace Impact.Api.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ResEmployee")
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RestaurantAccountId")
@@ -1081,15 +1081,19 @@ namespace Impact.Api.Migrations
 
             modelBuilder.Entity("Domain.Entities.Mail", b =>
                 {
-                    b.HasOne("Domain.Entities.RestaurantAccount", null)
+                    b.HasOne("Domain.Entities.RestaurantAccount", "RestaurantAccount")
                         .WithMany("Mails")
-                        .HasForeignKey("RestaurantAccountId");
+                        .HasForeignKey("RestaurantAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.TrainingInvoice", "TrainingInvoice")
                         .WithMany("Meals")
                         .HasForeignKey("TrainingInvoiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("RestaurantAccount");
 
                     b.Navigation("TrainingInvoice");
                 });
@@ -1312,9 +1316,9 @@ namespace Impact.Api.Migrations
                 {
                     b.Navigation("Mails");
 
-                    b.Navigation("receiptsToRestaurant");
-
                     b.Navigation("Restaurant");
+
+                    b.Navigation("receiptsToRestaurant");
                 });
 
             modelBuilder.Entity("Domain.Entities.Training", b =>

@@ -9,5 +9,5 @@ public class RestaurantAccount : BaseAuditableEntity
 
     public Restaurant? Restaurant { get; set; }
     public List<Mail>? Mails { get; set; } = new List<Mail>();
-    public List<ReceiptToRestaurant>? ReceiptToRestaurants { get; set; } = new List<ReceiptToRestaurant>();
+    public List<ReceiptToRestaurant>? receiptsToRestaurant { get; set; } = new List<ReceiptToRestaurant>();
 }

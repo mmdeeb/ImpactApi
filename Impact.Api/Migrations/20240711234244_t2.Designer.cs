@@ -1216,7 +1216,7 @@ namespace Impact.Api.Migrations
             modelBuilder.Entity("Domain.Entities.ReceiptToEmployee", b =>
                 {
                     b.HasOne("Domain.Entities.EmployeeAccount", "EmployeeAccount")
-                        .WithMany("ReceiptToEmployees")
+                        .WithMany("receiptsToEmployee")
                         .HasForeignKey("EmployeeAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1227,7 +1227,7 @@ namespace Impact.Api.Migrations
             modelBuilder.Entity("Domain.Entities.ReceiptToRestaurant", b =>
                 {
                     b.HasOne("Domain.Entities.RestaurantAccount", "RestaurantAccount")
-                        .WithMany("ReceiptToRestaurants")
+                        .WithMany("receiptsToRestaurant")
                         .HasForeignKey("RestaurantAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1288,7 +1288,7 @@ namespace Impact.Api.Migrations
                 {
                     b.Navigation("Employee");
 
-                    b.Navigation("ReceiptToEmployees");
+                    b.Navigation("receiptsToEmployee");
                 });
 
             modelBuilder.Entity("Domain.Entities.Hall", b =>
@@ -1305,7 +1305,7 @@ namespace Impact.Api.Migrations
                 {
                     b.Navigation("Mails");
 
-                    b.Navigation("ReceiptToRestaurants");
+                    b.Navigation("receiptsToRestaurant");
 
                     b.Navigation("Restaurant");
                 });

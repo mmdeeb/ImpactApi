@@ -7,56 +7,127 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReceiptToEmployeesController : ControllerBase
+    public class ReceiptsToEmployeeController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ReceiptToEmployeesController(ApplicationDbContext context)
+        public ReceiptsToEmployeeController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/ReceiptToEmployees
+        // GET: api/ReceiptsToEmployee
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReceiptToEmployee>>> GetreceiptToEmployees()
+        public async Task<ActionResult<IEnumerable<ReceiptToEmployeeDTO>>> GetReceiptsToEmployee()
         {
-            return await _context.receiptToEmployees.ToListAsync();
+            var receipts = await _context.receiptsToEmployee.ToListAsync();
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptToEmployeeDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                EmployeeAccountId = receipt.EmployeeAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
         }
 
-        // GET: api/ReceiptToEmployees/5
+        // GET: api/ReceiptsToEmployee/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReceiptToEmployee>> GetReceiptToEmployee(int id)
+        public async Task<ActionResult<ReceiptToEmployeeDTO>> GetReceiptToEmployee(int id)
         {
-            var receiptToEmployee = await _context.receiptToEmployees.FindAsync(id);
+            var receipt = await _context.receiptsToEmployee.FindAsync(id);
 
-            if (receiptToEmployee == null)
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            return receiptToEmployee;
+            var receiptDto = new ReceiptToEmployeeDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                EmployeeAccountId = receipt.EmployeeAccountId
+            };
+
+            return Ok(receiptDto);
         }
 
-        // PUT: api/ReceiptToEmployees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReceiptToEmployee(int id, ReceiptToEmployee receiptToEmployee)
+        // GET: api/ReceiptsToEmployee/ByEmployeeAccount/5
+        [HttpGet("ByEmployeeAccount/{employeeAccountId}")]
+        public async Task<ActionResult<IEnumerable<ReceiptToEmployeeDTO>>> GetReceiptsByEmployeeAccount(int employeeAccountId)
         {
-            if (id != receiptToEmployee.Id)
+            var receipts = await _context.receiptsToEmployee
+                                         .Where(r => r.EmployeeAccountId == employeeAccountId)
+                                         .ToListAsync();
+
+            if (!receipts.Any())
+            {
+                return NotFound();
+            }
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptToEmployeeDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                EmployeeAccountId = receipt.EmployeeAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
+        }
+
+        // PUT: api/ReceiptsToEmployee/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReceiptToEmployee(int id, ReceiptToEmployeeDTO receiptDto)
+        {
+            if (id != receiptDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(receiptToEmployee).State = EntityState.Modified;
+            var receipt = await _context.receiptsToEmployee.FindAsync(id);
+            if (receipt == null)
+            {
+                return NotFound();
+            }
+
+            var previousAmount = receipt.Amount;
+
+            receipt.Date = receiptDto.Date;
+            receipt.Receiver = receiptDto.Receiver;
+            receipt.Payer = receiptDto.Payer;
+            receipt.Amount = receiptDto.Amount;
+            receipt.EmployeeAccountId = receiptDto.EmployeeAccountId;
+
+            _context.Entry(receipt).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                var employeeAccount = await _context.employeeAccounts.FindAsync(receipt.EmployeeAccountId);
+                if (employeeAccount != null)
+                {
+                    employeeAccount.Debt += previousAmount; // Revert previous amount
+                    employeeAccount.Debt -= receipt.Amount; // Apply new amount
+                    _context.Entry(employeeAccount).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,36 +144,64 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/ReceiptToEmployees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/ReceiptsToEmployee
         [HttpPost]
-        public async Task<ActionResult<ReceiptToEmployee>> PostReceiptToEmployee(ReceiptToEmployee receiptToEmployee)
+        public async Task<ActionResult<ReceiptToEmployeeDTO>> PostReceiptToEmployee(ReceiptToEmployeeDTO receiptDto)
         {
-            _context.receiptToEmployees.Add(receiptToEmployee);
+            var receipt = new ReceiptToEmployee
+            {
+                Date = receiptDto.Date,
+                Receiver = receiptDto.Receiver,
+                Payer = receiptDto.Payer,
+                Amount = receiptDto.Amount,
+                EmployeeAccountId = receiptDto.EmployeeAccountId
+            };
+
+            _context.receiptsToEmployee.Add(receipt);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReceiptToEmployee", new { id = receiptToEmployee.Id }, receiptToEmployee);
+            var employeeAccount = await _context.employeeAccounts.FindAsync(receipt.EmployeeAccountId);
+            if (employeeAccount != null)
+            {
+                employeeAccount.Debt -= receipt.Amount;
+                _context.Entry(employeeAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            receiptDto.Id = receipt.Id;
+
+            return CreatedAtAction("GetReceiptToEmployee", new { id = receipt.Id }, receiptDto);
         }
 
-        // DELETE: api/ReceiptToEmployees/5
+        // DELETE: api/ReceiptsToEmployee/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReceiptToEmployee(int id)
         {
-            var receiptToEmployee = await _context.receiptToEmployees.FindAsync(id);
-            if (receiptToEmployee == null)
+            var receipt = await _context.receiptsToEmployee.FindAsync(id);
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            _context.receiptToEmployees.Remove(receiptToEmployee);
+            var amount = receipt.Amount;
+
+            _context.receiptsToEmployee.Remove(receipt);
             await _context.SaveChangesAsync();
+
+            var employeeAccount = await _context.employeeAccounts.FindAsync(receipt.EmployeeAccountId);
+            if (employeeAccount != null)
+            {
+                employeeAccount.Debt += amount;
+                _context.Entry(employeeAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
 
             return NoContent();
         }
 
         private bool ReceiptToEmployeeExists(int id)
         {
-            return _context.receiptToEmployees.Any(e => e.Id == id);
+            return _context.receiptsToEmployee.Any(e => e.Id == id);
         }
     }
 }

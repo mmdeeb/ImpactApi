@@ -7,56 +7,127 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReceiptFromClientsController : ControllerBase
+    public class ReceiptsFromClientController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ReceiptFromClientsController(ApplicationDbContext context)
+        public ReceiptsFromClientController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/ReceiptFromClients
+        // GET: api/ReceiptsFromClient
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReceiptFromClient>>> GetreceiptFromClients()
+        public async Task<ActionResult<IEnumerable<ReceiptFromClientDTO>>> GetReceiptsFromClient()
         {
-            return await _context.receiptFromClients.ToListAsync();
+            var receipts = await _context.receiptsFromClient.ToListAsync();
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptFromClientDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                ClientAccountId = receipt.ClientAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
         }
 
-        // GET: api/ReceiptFromClients/5
+        // GET: api/ReceiptsFromClient/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReceiptFromClient>> GetReceiptFromClient(int id)
+        public async Task<ActionResult<ReceiptFromClientDTO>> GetReceiptFromClient(int id)
         {
-            var receiptFromClient = await _context.receiptFromClients.FindAsync(id);
+            var receipt = await _context.receiptsFromClient.FindAsync(id);
 
-            if (receiptFromClient == null)
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            return receiptFromClient;
+            var receiptDto = new ReceiptFromClientDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                ClientAccountId = receipt.ClientAccountId
+            };
+
+            return Ok(receiptDto);
         }
 
-        // PUT: api/ReceiptFromClients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReceiptFromClient(int id, ReceiptFromClient receiptFromClient)
+        // GET: api/ReceiptsFromClient/ByClientAccount/5
+        [HttpGet("ByClientAccount/{clientAccountId}")]
+        public async Task<ActionResult<IEnumerable<ReceiptFromClientDTO>>> GetReceiptsByClientAccount(int clientAccountId)
         {
-            if (id != receiptFromClient.Id)
+            var receipts = await _context.receiptsFromClient
+                                         .Where(r => r.ClientAccountId == clientAccountId)
+                                         .ToListAsync();
+
+            if (!receipts.Any())
+            {
+                return NotFound();
+            }
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptFromClientDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                ClientAccountId = receipt.ClientAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
+        }
+
+        // PUT: api/ReceiptsFromClient/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReceiptFromClient(int id, ReceiptFromClientDTO receiptDto)
+        {
+            if (id != receiptDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(receiptFromClient).State = EntityState.Modified;
+            var receipt = await _context.receiptsFromClient.FindAsync(id);
+            if (receipt == null)
+            {
+                return NotFound();
+            }
+
+            var previousAmount = receipt.Amount;
+
+            receipt.Date = receiptDto.Date;
+            receipt.Receiver = receiptDto.Receiver;
+            receipt.Payer = receiptDto.Payer;
+            receipt.Amount = receiptDto.Amount;
+            receipt.ClientAccountId = receiptDto.ClientAccountId;
+
+            _context.Entry(receipt).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                var clientAccount = await _context.clientAccounts.FindAsync(receipt.ClientAccountId);
+                if (clientAccount != null)
+                {
+                    clientAccount.Debt += previousAmount;
+                    clientAccount.Debt -= receipt.Amount; 
+                    _context.Entry(clientAccount).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,36 +144,64 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/ReceiptFromClients
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/ReceiptsFromClient
         [HttpPost]
-        public async Task<ActionResult<ReceiptFromClient>> PostReceiptFromClient(ReceiptFromClient receiptFromClient)
+        public async Task<ActionResult<ReceiptFromClientDTO>> PostReceiptFromClient(ReceiptFromClientDTO receiptDto)
         {
-            _context.receiptFromClients.Add(receiptFromClient);
+            var receipt = new ReceiptFromClient
+            {
+                Date = receiptDto.Date,
+                Receiver = receiptDto.Receiver,
+                Payer = receiptDto.Payer,
+                Amount = receiptDto.Amount,
+                ClientAccountId = receiptDto.ClientAccountId
+            };
+
+            _context.receiptsFromClient.Add(receipt);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReceiptFromClient", new { id = receiptFromClient.Id }, receiptFromClient);
+            var clientAccount = await _context.clientAccounts.FindAsync(receipt.ClientAccountId);
+            if (clientAccount != null)
+            {
+                clientAccount.Debt -= receipt.Amount;
+                _context.Entry(clientAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            receiptDto.Id = receipt.Id;
+
+            return CreatedAtAction("GetReceiptFromClient", new { id = receipt.Id }, receiptDto);
         }
 
-        // DELETE: api/ReceiptFromClients/5
+        // DELETE: api/ReceiptsFromClient/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReceiptFromClient(int id)
         {
-            var receiptFromClient = await _context.receiptFromClients.FindAsync(id);
-            if (receiptFromClient == null)
+            var receipt = await _context.receiptsFromClient.FindAsync(id);
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            _context.receiptFromClients.Remove(receiptFromClient);
+            var amount = receipt.Amount;
+
+            _context.receiptsFromClient.Remove(receipt);
             await _context.SaveChangesAsync();
+
+            var clientAccount = await _context.clientAccounts.FindAsync(receipt.ClientAccountId);
+            if (clientAccount != null)
+            {
+                clientAccount.Debt += amount;
+                _context.Entry(clientAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
 
             return NoContent();
         }
 
         private bool ReceiptFromClientExists(int id)
         {
-            return _context.receiptFromClients.Any(e => e.Id == id);
+            return _context.receiptsFromClient.Any(e => e.Id == id);
         }
     }
 }

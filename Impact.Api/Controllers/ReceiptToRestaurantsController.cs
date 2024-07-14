@@ -7,56 +7,127 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReceiptToRestaurantsController : ControllerBase
+    public class ReceiptsToRestaurantController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
-        public ReceiptToRestaurantsController(ApplicationDbContext context)
+        public ReceiptsToRestaurantController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/ReceiptToRestaurants
+        // GET: api/ReceiptsToRestaurant
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReceiptToRestaurant>>> GetreceiptToRestaurants()
+        public async Task<ActionResult<IEnumerable<ReceiptToRestaurantDTO>>> GetReceiptsToRestaurant()
         {
-            return await _context.receiptToRestaurants.ToListAsync();
+            var receipts = await _context.receiptsToRestaurant.ToListAsync();
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptToRestaurantDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                RestaurantAccountId = receipt.RestaurantAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
         }
 
-        // GET: api/ReceiptToRestaurants/5
+        // GET: api/ReceiptsToRestaurant/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReceiptToRestaurant>> GetReceiptToRestaurant(int id)
+        public async Task<ActionResult<ReceiptToRestaurantDTO>> GetReceiptToRestaurant(int id)
         {
-            var receiptToRestaurant = await _context.receiptToRestaurants.FindAsync(id);
+            var receipt = await _context.receiptsToRestaurant.FindAsync(id);
 
-            if (receiptToRestaurant == null)
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            return receiptToRestaurant;
+            var receiptDto = new ReceiptToRestaurantDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                RestaurantAccountId = receipt.RestaurantAccountId
+            };
+
+            return Ok(receiptDto);
         }
 
-        // PUT: api/ReceiptToRestaurants/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReceiptToRestaurant(int id, ReceiptToRestaurant receiptToRestaurant)
+        // GET: api/ReceiptsToRestaurant/ByRestaurantAccount/5
+        [HttpGet("ByRestaurantAccount/{restaurantAccountId}")]
+        public async Task<ActionResult<IEnumerable<ReceiptToRestaurantDTO>>> GetReceiptsByRestaurantAccount(int restaurantAccountId)
         {
-            if (id != receiptToRestaurant.Id)
+            var receipts = await _context.receiptsToRestaurant
+                                         .Where(r => r.RestaurantAccountId == restaurantAccountId)
+                                         .ToListAsync();
+
+            if (!receipts.Any())
+            {
+                return NotFound();
+            }
+
+            var receiptDtos = receipts.Select(receipt => new ReceiptToRestaurantDTO
+            {
+                Id = receipt.Id,
+                Date = receipt.Date,
+                Receiver = receipt.Receiver,
+                Payer = receipt.Payer,
+                Amount = receipt.Amount,
+                RestaurantAccountId = receipt.RestaurantAccountId
+            }).ToList();
+
+            return Ok(receiptDtos);
+        }
+
+        // PUT: api/ReceiptsToRestaurant/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReceiptToRestaurant(int id, ReceiptToRestaurantDTO receiptDto)
+        {
+            if (id != receiptDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(receiptToRestaurant).State = EntityState.Modified;
+            var receipt = await _context.receiptsToRestaurant.FindAsync(id);
+            if (receipt == null)
+            {
+                return NotFound();
+            }
+
+            var previousAmount = receipt.Amount;
+
+            receipt.Date = receiptDto.Date;
+            receipt.Receiver = receiptDto.Receiver;
+            receipt.Payer = receiptDto.Payer;
+            receipt.Amount = receiptDto.Amount;
+            receipt.RestaurantAccountId = receiptDto.RestaurantAccountId;
+
+            _context.Entry(receipt).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                var restaurantAccount = await _context.restaurantAccounts.FindAsync(receipt.RestaurantAccountId);
+                if (restaurantAccount != null)
+                {
+                    restaurantAccount.Debt += previousAmount; 
+                    restaurantAccount.Debt -= receipt.Amount;
+                    _context.Entry(restaurantAccount).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -73,36 +144,64 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/ReceiptToRestaurants
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/ReceiptsToRestaurant
         [HttpPost]
-        public async Task<ActionResult<ReceiptToRestaurant>> PostReceiptToRestaurant(ReceiptToRestaurant receiptToRestaurant)
+        public async Task<ActionResult<ReceiptToRestaurantDTO>> PostReceiptToRestaurant(ReceiptToRestaurantDTO receiptDto)
         {
-            _context.receiptToRestaurants.Add(receiptToRestaurant);
+            var receipt = new ReceiptToRestaurant
+            {
+                Date = receiptDto.Date,
+                Receiver = receiptDto.Receiver,
+                Payer = receiptDto.Payer,
+                Amount = receiptDto.Amount,
+                RestaurantAccountId = receiptDto.RestaurantAccountId
+            };
+
+            _context.receiptsToRestaurant.Add(receipt);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReceiptToRestaurant", new { id = receiptToRestaurant.Id }, receiptToRestaurant);
+            var restaurantAccount = await _context.restaurantAccounts.FindAsync(receipt.RestaurantAccountId);
+            if (restaurantAccount != null)
+            {
+                restaurantAccount.Debt -= receipt.Amount;
+                _context.Entry(restaurantAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            receiptDto.Id = receipt.Id;
+
+            return CreatedAtAction("GetReceiptToRestaurant", new { id = receipt.Id }, receiptDto);
         }
 
-        // DELETE: api/ReceiptToRestaurants/5
+        // DELETE: api/ReceiptsToRestaurant/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReceiptToRestaurant(int id)
         {
-            var receiptToRestaurant = await _context.receiptToRestaurants.FindAsync(id);
-            if (receiptToRestaurant == null)
+            var receipt = await _context.receiptsToRestaurant.FindAsync(id);
+            if (receipt == null)
             {
                 return NotFound();
             }
 
-            _context.receiptToRestaurants.Remove(receiptToRestaurant);
+            var amount = receipt.Amount;
+
+            _context.receiptsToRestaurant.Remove(receipt);
             await _context.SaveChangesAsync();
+
+            var restaurantAccount = await _context.restaurantAccounts.FindAsync(receipt.RestaurantAccountId);
+            if (restaurantAccount != null)
+            {
+                restaurantAccount.Debt += amount;
+                _context.Entry(restaurantAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
 
             return NoContent();
         }
 
         private bool ReceiptToRestaurantExists(int id)
         {
-            return _context.receiptToRestaurants.Any(e => e.Id == id);
+            return _context.receiptsToRestaurant.Any(e => e.Id == id);
         }
     }
 }

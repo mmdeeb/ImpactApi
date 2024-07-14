@@ -22,9 +22,9 @@ namespace ImpactBackend.Infrastructure.Persistence
         public DbSet<ClientAccount> clientAccounts { get; set; }
         public DbSet<Employee> employees { get; set; }
         public DbSet<EmployeeAccount> employeeAccounts { get; set; }
-        public DbSet<ReceiptFromClient> receiptFromClients { get; set; }
-        public DbSet<ReceiptToEmployee> receiptToEmployees { get; set; }
-        public DbSet<ReceiptToRestaurant> receiptToRestaurants { get; set; }
+        public DbSet<ReceiptFromClient> receiptsFromClient { get; set; }
+        public DbSet<ReceiptToEmployee> receiptsToEmployee { get; set; }
+        public DbSet<ReceiptToRestaurant> receiptsToRestaurant { get; set; }
         public DbSet<Receipt> receipts { get; set; }
         public DbSet<Hall> halls { get; set; }
         public DbSet<LogisticCost> logisticCosts { get; set; }

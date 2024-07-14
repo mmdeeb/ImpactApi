@@ -18,6 +18,6 @@ namespace Domain.Entities
         public double? Reward { get; set; }
         public double TotalBalance { get; set; }
         public double Debt { get; set; }
-        public List<ReceiptToEmployee>? ReceiptToEmployees { get; set; } = new List<ReceiptToEmployee>();
+        public List<ReceiptToEmployee>? receiptsToEmployee { get; set; } = new List<ReceiptToEmployee>();
     }
 }
