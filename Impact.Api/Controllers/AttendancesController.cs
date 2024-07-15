@@ -31,7 +31,7 @@ namespace Impact.Api.Controllers
             var attendanceDtos = attendances.Select(attendance => new AttendanceDTO
             {
                 Id = attendance.Id,
-                AttendanceName = attendance.AttendanceName,
+                AttendanceDate = attendance.AttendanceDate,
                 TrainingId = attendance.TrainingId,
                 TrainingName = attendance.Training?.TrainingName
             }).ToList();
@@ -53,7 +53,7 @@ namespace Impact.Api.Controllers
             var attendanceDto = new AttendanceDTO
             {
                 Id = attendance.Id,
-                AttendanceName = attendance.AttendanceName,
+                AttendanceDate = attendance.AttendanceDate,
                 TrainingId = attendance.TrainingId,
                 TrainingName = attendance.Training?.TrainingName
             };
@@ -93,14 +93,13 @@ namespace Impact.Api.Controllers
             {
                 return BadRequest();
             }
-
+            
             var attendance = await _context.attendances.FindAsync(id);
             if (attendance == null)
             {
                 return NotFound();
             }
-
-            attendance.AttendanceName = attendanceDto.AttendanceName;
+            attendance.AttendanceDate = attendanceDto.AttendanceDate;
             attendance.TrainingId = attendanceDto.TrainingId;
 
             _context.Entry(attendance).State = EntityState.Modified;
@@ -130,8 +129,8 @@ namespace Impact.Api.Controllers
         {
             var attendance = new Attendance
             {
-                AttendanceName = attendanceDto.AttendanceName,
-                TrainingId = attendanceDto.TrainingId
+                AttendanceDate = attendanceDto.AttendanceDate,
+                TrainingId = attendanceDto.TrainingId,
             };
 
             _context.attendances.Add(attendance);
