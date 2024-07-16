@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
+using Impact.Api.Models;
 
 namespace Impact.Api.Controllers
 {
@@ -26,90 +27,22 @@ namespace Impact.Api.Controllers
         // GET: api/FinancialFunds
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<FinancialFund>>> GetfinancialFunds()
+        public async Task<ActionResult<FinancialFundDTO>> GetFinancialFund()
         {
-            return await _context.financialFunds.ToListAsync();
-        }
+            var totalRestaurantDebt = await _context.restaurantAccounts.SumAsync(r => r.Debt);
+            var totalEmployeeDebt = await _context.employeeAccounts.SumAsync(e => e.Debt);
+            var totalClientDebt = await _context.clientAccounts.SumAsync(c => c.Debt);
 
-        // GET: api/FinancialFunds/5
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<FinancialFund>> GetFinancialFund(int id)
-        {
-            var financialFund = await _context.financialFunds.FindAsync(id);
 
-            if (financialFund == null)
+            var financialFundDto = new FinancialFundDTO
             {
-                return NotFound();
-            }
+                DebtOnTheFund = totalRestaurantDebt + totalEmployeeDebt,
+                DebtToTheFund = totalClientDebt
+            };
 
-            return financialFund;
+            return Ok(financialFundDto);
         }
 
-        // PUT: api/FinancialFunds/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> PutFinancialFund(int id, FinancialFund financialFund)
-        {
-            if (id != financialFund.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(financialFund).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FinancialFundExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/FinancialFunds
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<FinancialFund>> PostFinancialFund(FinancialFund financialFund)
-        {
-            _context.financialFunds.Add(financialFund);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFinancialFund", new { id = financialFund.Id }, financialFund);
-        }
-
-        // DELETE: api/FinancialFunds/5
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteFinancialFund(int id)
-        {
-            var financialFund = await _context.financialFunds.FindAsync(id);
-            if (financialFund == null)
-            {
-                return NotFound();
-            }
-
-            _context.financialFunds.Remove(financialFund);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FinancialFundExists(int id)
-        {
-            return _context.financialFunds.Any(e => e.Id == id);
-        }
+             
     }
 }

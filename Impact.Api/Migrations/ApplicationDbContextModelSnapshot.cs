@@ -143,7 +143,7 @@ namespace Impact.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("AttendanceName")
+                    b.Property<DateTime>("AttendanceDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Created")
@@ -279,37 +279,6 @@ namespace Impact.Api.Migrations
                     b.ToTable("employeeAccounts");
                 });
 
-            modelBuilder.Entity("Domain.Entities.FinancialFund", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("DebtOnTheFund")
-                        .HasColumnType("float");
-
-                    b.Property<double>("DebtToTheFund")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("financialFunds");
-                });
-
             modelBuilder.Entity("Domain.Entities.Hall", b =>
                 {
                     b.Property<int>("Id")
@@ -344,51 +313,6 @@ namespace Impact.Api.Migrations
                     b.HasIndex("CenterId");
 
                     b.ToTable("halls");
-                });
-
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CenterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Debt")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmployeeName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhotoInvoiceURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TotalBalance")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CenterId");
-
-                    b.ToTable("logisticCosts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Mail", b =>
@@ -455,6 +379,9 @@ namespace Impact.Api.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("float");
 
+                    b.Property<int>("CenterId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -467,8 +394,8 @@ namespace Impact.Api.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("EmployeeName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
@@ -481,7 +408,7 @@ namespace Impact.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("CenterId");
 
                     b.ToTable("otherExpenses");
                 });
@@ -517,9 +444,6 @@ namespace Impact.Api.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LogisticCostId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Payer")
                         .HasColumnType("nvarchar(max)");
 
@@ -527,8 +451,6 @@ namespace Impact.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LogisticCostId");
 
                     b.ToTable("receipts");
 
@@ -1065,17 +987,6 @@ namespace Impact.Api.Migrations
                     b.Navigation("Center");
                 });
 
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
-                {
-                    b.HasOne("Domain.Entities.Center", "Center")
-                        .WithMany()
-                        .HasForeignKey("CenterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Center");
-                });
-
             modelBuilder.Entity("Domain.Entities.Mail", b =>
                 {
                     b.HasOne("Domain.Entities.RestaurantAccount", "RestaurantAccount")
@@ -1097,20 +1008,13 @@ namespace Impact.Api.Migrations
 
             modelBuilder.Entity("Domain.Entities.OtherExpenses", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
+                    b.HasOne("Domain.Entities.Center", "Center")
                         .WithMany()
-                        .HasForeignKey("EmployeeId")
+                        .HasForeignKey("CenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Receipt", b =>
-                {
-                    b.HasOne("Domain.Entities.LogisticCost", null)
-                        .WithMany("Receipts")
-                        .HasForeignKey("LogisticCostId");
+                    b.Navigation("Center");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
@@ -1302,11 +1206,6 @@ namespace Impact.Api.Migrations
             modelBuilder.Entity("Domain.Entities.Hall", b =>
                 {
                     b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
-                {
-                    b.Navigation("Receipts");
                 });
 
             modelBuilder.Entity("Domain.Entities.RestaurantAccount", b =>
