@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TrainersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainers
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainerDTO>>> GetTrainers()
         {
             var trainers = await _context.trainers.ToListAsync();
@@ -43,6 +46,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainers/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<TrainerDTO>> GetTrainer(int id)
         {
             var trainer = await _context.trainers.FirstOrDefaultAsync(t => t.Id == id);
@@ -67,6 +71,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainers/GetTrainersBySubTraining/5
         [HttpGet("GetTrainersBySubTraining/{subTrainingId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainerDTO>>> GetTrainersBySubTraining(int subTrainingId)
         {
             var trainers = await _context.subTrainings
@@ -95,6 +100,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Trainers/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutTrainer(int id, TrainerDTO trainerDto)
         {
             if (id != trainerDto.Id)
@@ -137,6 +143,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainers
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<TrainerDTO>> PostTrainer(TrainerDTO trainerDto)
         {
             var trainer = new Trainer
@@ -158,6 +165,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainers/5/AddSubTrainings
         [HttpPost("{trainerId}/AddSubTrainings")]
+        [Authorize]
         public async Task<ActionResult<TrainerDTO>> AddSubTrainingsToTrainer(int trainerId, [FromBody] List<int> subTrainingIds)
         {
             var trainer = await _context.trainers
@@ -201,6 +209,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Trainers/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteTrainer(int id)
         {
             var trainer = await _context.trainers.FindAsync(id);

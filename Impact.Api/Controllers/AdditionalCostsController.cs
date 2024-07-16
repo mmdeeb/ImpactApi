@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AdditionalCostsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/AdditionalCosts
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<AdditionalCostDTO>>> GetAdditionalCosts()
         {
             var additionalCosts = await _context.additionalCosts.ToListAsync();
@@ -43,6 +46,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/AdditionalCosts/ByInvoice/5
         [HttpGet("ByInvoice/{trainingInvoiceId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<AdditionalCostDTO>>> GetAdditionalCostsByInvoice(int trainingInvoiceId)
         {
             var additionalCosts = await _context.additionalCosts
@@ -69,6 +73,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/AdditionalCosts/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<AdditionalCostDTO>> GetAdditionalCost(int id)
         {
             var additionalCost = await _context.additionalCosts.FindAsync(id);
@@ -93,6 +98,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/AdditionalCosts/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutAdditionalCost(int id, AdditionalCostDTO additionalCostDto)
         {
             if (id != additionalCostDto.Id)
@@ -156,6 +162,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/AdditionalCosts
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<AdditionalCostDTO>> PostAdditionalCost(AdditionalCostDTO additionalCostDto)
         {
             var additionalCost = new AdditionalCost
@@ -193,6 +200,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/AdditionalCosts/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAdditionalCost(int id)
         {
             var additionalCost = await _context.additionalCosts.FindAsync(id);

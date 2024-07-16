@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReceiptsFromClientController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsFromClient
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ReceiptFromClientDTO>>> GetReceiptsFromClient()
         {
             var receipts = await _context.receiptsFromClient.ToListAsync();
@@ -43,6 +46,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsFromClient/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<ReceiptFromClientDTO>> GetReceiptFromClient(int id)
         {
             var receipt = await _context.receiptsFromClient.FindAsync(id);
@@ -67,6 +71,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsFromClient/ByClientAccount/5
         [HttpGet("ByClientAccount/{clientAccountId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ReceiptFromClientDTO>>> GetReceiptsByClientAccount(int clientAccountId)
         {
             var receipts = await _context.receiptsFromClient
@@ -93,6 +98,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/ReceiptsFromClient/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutReceiptFromClient(int id, ReceiptFromClientDTO receiptDto)
         {
             if (id != receiptDto.Id)
@@ -146,6 +152,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/ReceiptsFromClient
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ReceiptFromClientDTO>> PostReceiptFromClient(ReceiptFromClientDTO receiptDto)
         {
             var receipt = new ReceiptFromClient
@@ -175,6 +182,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/ReceiptsFromClient/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteReceiptFromClient(int id)
         {
             var receipt = await _context.receiptsFromClient.FindAsync(id);

@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ClientsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
             var clients = await _context.clients.ToListAsync();
@@ -42,6 +45,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
@@ -65,6 +69,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Clients/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)
         {
             if (id != clientDto.Id)
@@ -106,6 +111,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Clients
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ClientDTO>> PostClient(ClientDTO clientDto)
         {
             var clientAccount = new ClientAccount
@@ -137,6 +143,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await _context.clients.FindAsync(id);

@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SubTrainingsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainings()
         {
             var subTrainings = await _context.subTrainings.ToListAsync();
@@ -41,6 +44,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<SubTrainingDTO>> GetSubTraining(int id)
         {
             var subTraining = await _context.subTrainings.FirstOrDefaultAsync(st => st.Id == id);
@@ -63,6 +67,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings/GetSubTrainingsByTrainer/5
         [HttpGet("GetSubTrainingsByTrainer/{trainerId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainingsByTrainer(int trainerId)
         {
             var subTrainings = await _context.trainers
@@ -89,6 +94,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/SubTrainings/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutSubTraining(int id, SubTrainingDTO subTrainingDto)
         {
             if (id != subTrainingDto.Id)
@@ -129,6 +135,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/SubTrainings
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<SubTrainingDTO>> PostSubTraining(SubTrainingDTO subTrainingDto)
         {
             var subTraining = new SubTraining
@@ -189,6 +196,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/SubTrainings/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteSubTraining(int id)
         {
             var subTraining = await _context.subTrainings.FindAsync(id);

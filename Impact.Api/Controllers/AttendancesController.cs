@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AttendancesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Attendances
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<AttendanceDTO>>> GetAttendances()
         {
             var attendances = await _context.attendances.Include(a => a.Training).ToListAsync();
@@ -41,6 +44,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Attendances/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<AttendanceDTO>> GetAttendance(int id)
         {
             var attendance = await _context.attendances.FirstOrDefaultAsync(a => a.Id == id);
@@ -63,6 +67,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Attendances/Trainees/5
         [HttpGet("Trainees/{attendanceId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TraineeDTO>>> GetTraineesByAttendance(int attendanceId)
         {
             var attendance = await _context.attendances
@@ -87,6 +92,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Attendances/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutAttendance(int id, AttendanceDTO attendanceDto)
         {
             if (id != attendanceDto.Id)
@@ -126,6 +132,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Attendances
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<AttendanceDTO>> PostAttendance(AttendanceDTO attendanceDto)
         {
             var attendance = new Attendance
@@ -144,6 +151,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Attendances/5/AddTrainees
         [HttpPost("{id}/AddTrainees")]
+        [Authorize]
         public async Task<IActionResult> AddTraineesToAttendance(int id, [FromBody] List<int> traineeIds)
         {
             var attendance = await _context.attendances
@@ -184,6 +192,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Attendances/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAttendance(int id)
         {
             var attendance = await _context.attendances.FindAsync(id);

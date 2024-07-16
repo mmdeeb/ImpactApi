@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FinancialFundsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -23,6 +25,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/FinancialFunds
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<FinancialFund>>> GetfinancialFunds()
         {
             return await _context.financialFunds.ToListAsync();
@@ -30,6 +33,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/FinancialFunds/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<FinancialFund>> GetFinancialFund(int id)
         {
             var financialFund = await _context.financialFunds.FindAsync(id);
@@ -45,6 +49,7 @@ namespace Impact.Api.Controllers
         // PUT: api/FinancialFunds/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutFinancialFund(int id, FinancialFund financialFund)
         {
             if (id != financialFund.Id)
@@ -76,6 +81,7 @@ namespace Impact.Api.Controllers
         // POST: api/FinancialFunds
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<FinancialFund>> PostFinancialFund(FinancialFund financialFund)
         {
             _context.financialFunds.Add(financialFund);
@@ -86,6 +92,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/FinancialFunds/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteFinancialFund(int id)
         {
             var financialFund = await _context.financialFunds.FindAsync(id);

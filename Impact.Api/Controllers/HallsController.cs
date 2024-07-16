@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class HallsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Halls
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<HallDTO>>> GetHalls()
         {
             var halls = await _context.halls.ToListAsync();
@@ -41,6 +44,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Halls/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<HallDTO>> GetHall(int id)
         {
             var hall = await _context.halls.FindAsync(id);
@@ -63,6 +67,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Halls/ByCenter/5
         [HttpGet("ByCenter/{centerId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<HallDTO>>> GetHallsByCenter(int centerId)
         {
             var halls = await _context.halls
@@ -87,6 +92,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Halls/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutHall(int id, HallDTO hallDto)
         {
             if (id != hallDto.Id)
@@ -127,6 +133,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Halls
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<HallDTO>> PostHall(HallDTO hallDto)
         {
             var hall = new Hall
@@ -146,6 +153,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Halls/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteHall(int id)
         {
             var hall = await _context.halls.FindAsync(id);

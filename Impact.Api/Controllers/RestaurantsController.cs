@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RestaurantsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Restaurants
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RestaurantDTO>>> GetRestaurants()
         {
             var restaurants = await _context.restaurants.ToListAsync();
@@ -41,6 +44,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Restaurants/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<RestaurantDTO>> GetRestaurant(int id)
         {
             var restaurant = await _context.restaurants.FindAsync(id);
@@ -63,6 +67,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Restaurants/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutRestaurant(int id, RestaurantDTO restaurantDto)
         {
             if (id != restaurantDto.Id)
@@ -103,6 +108,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Restaurants
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<RestaurantDTO>> PostRestaurant(RestaurantDTO restaurantDto)
         {
           
@@ -132,6 +138,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Restaurants/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteRestaurant(int id)
         {
             var restaurant = await _context.restaurants.FindAsync(id);

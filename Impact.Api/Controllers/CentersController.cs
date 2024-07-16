@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CentersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Centers
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<CenterDTO>>> GetCenters()
         {
             var centers = await _context.centers.ToListAsync();
@@ -42,6 +45,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Centers/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<CenterDTO>> GetCenter(int id)
         {
             var center = await _context.centers.FindAsync(id);
@@ -66,6 +70,7 @@ namespace Impact.Api.Controllers
         // PUT: api/Centers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutCenter(int id, CenterDTO centerDto)
         {
             if (id != centerDto.Id)
@@ -108,6 +113,7 @@ namespace Impact.Api.Controllers
         // POST: api/Centers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<CenterDTO>> PostCenter(CenterDTO centerDto)
         {
             var center = new Center
@@ -128,6 +134,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Centers/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCenter(int id)
         {
             var center = await _context.centers.FindAsync(id);
