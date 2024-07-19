@@ -46,7 +46,7 @@ namespace Impact.Api.Controllers
         // GET: api/Clients/5
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<ClientDTO>> GetClient(int id)
+        public async Task<ActionResult<ClientDTO>> GetClient(string id)
         {
             var client = await _context.clients.FindAsync(id);
 
@@ -70,7 +70,7 @@ namespace Impact.Api.Controllers
         // PUT: api/Clients/5
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)
+        public async Task<IActionResult> PutClient(string id, ClientDTO clientDto)
         {
             if (id != clientDto.Id)
             {
@@ -84,7 +84,6 @@ namespace Impact.Api.Controllers
             }
 
             client.Name = clientDto.Name;
-            client.Email = clientDto.Email;
             client.PhoneNumber = clientDto.PhoneNumber;
             client.ClientAccountId = clientDto.ClientAccountId;
 
@@ -144,7 +143,7 @@ namespace Impact.Api.Controllers
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteClient(int id)
+        public async Task<IActionResult> DeleteClient(string id)
         {
             var client = await _context.clients.FindAsync(id);
             if (client == null)
@@ -158,7 +157,7 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        private bool ClientExists(int id)
+        private bool ClientExists(string id)
         {
             return _context.clients.Any(e => e.Id == id);
         }

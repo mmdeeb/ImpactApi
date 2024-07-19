@@ -9,6 +9,7 @@ using Domain.Entities;
 using ImpactBackend.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Impact.Api.Controllers
 {
@@ -37,7 +38,6 @@ namespace Impact.Api.Controllers
                 Name = employee.Name,
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
-                Password = employee.Password,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -61,11 +61,11 @@ namespace Impact.Api.Controllers
 
             var employeeDto = new EmployeeDTO
             {
+               
                 Id = employee.Id,
                 Name = employee.Name,
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
-                Password = employee.Password,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -95,7 +95,6 @@ namespace Impact.Api.Controllers
                 Name = employee.Name,
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
-                Password = employee.Password,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -108,7 +107,7 @@ namespace Impact.Api.Controllers
         // PUT: api/Employees/5
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutEmployee(int id, EmployeeDTO employeeDto)
+        public async Task<IActionResult> PutEmployee(string id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.Id)
             {
@@ -124,7 +123,6 @@ namespace Impact.Api.Controllers
             employee.Name = employeeDto.Name;
             employee.Email = employeeDto.Email;
             employee.PhoneNumber = employeeDto.PhoneNumber;
-            employee.Password = employeeDto.Password;
             employee.EmployeeType = employeeDto.EmployeeType;
             employee.Salary = employeeDto.Salary;
             employee.CenterId = employeeDto.CenterId;
@@ -170,7 +168,6 @@ namespace Impact.Api.Controllers
                 Name = employeeDto.Name,
                 Email = employeeDto.Email,
                 PhoneNumber = employeeDto.PhoneNumber,
-                Password = employeeDto.Password,
                 EmployeeType = employeeDto.EmployeeType,
                 Salary = employeeDto.Salary,
                 CenterId = employeeDto.CenterId,
@@ -253,7 +250,7 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        private bool EmployeeExists(int id)
+        private bool EmployeeExists(string id)
         {
             return _context.employees.Any(e => e.Id == id);
         }
