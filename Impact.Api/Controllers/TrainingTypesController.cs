@@ -5,14 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Impact.Api.Models;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class TrainingTypesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -24,7 +23,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/TrainingTypes
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainingTypeDTO>>> GetTrainingTypes()
         {
             var trainingTypes = await _context.trainingTypes.ToListAsync();
@@ -32,7 +30,8 @@ namespace Impact.Api.Controllers
             var trainingTypeDTOs = trainingTypes.Select(tt => new TrainingTypeDTO
             {
                 Id = tt.Id,
-                TrainingTypeName = tt.TrainingTypeName
+                TrainingTypeName = tt.TrainingTypeName,
+                ImgLink = tt.ImgLink,
             }).ToList();
 
             return trainingTypeDTOs;
@@ -40,7 +39,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/TrainingTypes/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<TrainingTypeDTO>> GetTrainingType(int id)
         {
             var trainingType = await _context.trainingTypes.FindAsync(id);
@@ -53,7 +51,8 @@ namespace Impact.Api.Controllers
             var trainingTypeDTO = new TrainingTypeDTO
             {
                 Id = trainingType.Id,
-                TrainingTypeName = trainingType.TrainingTypeName
+                TrainingTypeName = trainingType.TrainingTypeName,
+                ImgLink = trainingType.ImgLink,
             };
 
             return trainingTypeDTO;
@@ -61,7 +60,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/TrainingTypes/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutTrainingType(int id, TrainingTypeDTO trainingTypeDTO)
         {
             if (id != trainingTypeDTO.Id)
@@ -76,6 +74,7 @@ namespace Impact.Api.Controllers
             }
 
             trainingType.TrainingTypeName = trainingTypeDTO.TrainingTypeName;
+            trainingType.ImgLink = trainingTypeDTO.ImgLink;
 
             _context.Entry(trainingType).State = EntityState.Modified;
 
@@ -100,12 +99,12 @@ namespace Impact.Api.Controllers
 
         // POST: api/TrainingTypes
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<TrainingTypeDTO>> PostTrainingType(TrainingTypeDTO trainingTypeDTO)
         {
             var trainingType = new TrainingType
             {
-                TrainingTypeName = trainingTypeDTO.TrainingTypeName
+                TrainingTypeName = trainingTypeDTO.TrainingTypeName,
+                ImgLink = trainingTypeDTO.ImgLink,
             };
 
             _context.trainingTypes.Add(trainingType);
@@ -118,7 +117,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/TrainingTypes/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteTrainingType(int id)
         {
             var trainingType = await _context.trainingTypes.FindAsync(id);

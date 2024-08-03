@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class OtherExpensesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/OtherExpenses
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<OtherExpensesDTO>>> GetOtherExpenses()
         {
             var expenses = await _context.otherExpenses.ToListAsync();
@@ -47,7 +45,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/OtherExpenses/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<OtherExpensesDTO>> GetOtherExpense(int id)
         {
             var expense = await _context.otherExpenses.FindAsync(id);
@@ -73,7 +70,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/OtherExpenses/ByCenter/5
         [HttpGet("ByCenter/{centerId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<OtherExpensesDTO>>> GetOtherExpensesByCenter(int centerId)
         {
             var expenses = await _context.otherExpenses
@@ -101,7 +97,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/OtherExpenses/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutOtherExpense(int id, OtherExpensesDTO expenseDto)
         {
             if (id != expenseDto.Id)
@@ -145,7 +140,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/OtherExpenses
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<OtherExpensesDTO>> PostOtherExpense(OtherExpensesDTO expenseDto)
         {
             var expense = new OtherExpenses
@@ -168,7 +162,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/OtherExpenses/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteOtherExpense(int id)
         {
             var expense = await _context.otherExpenses.FindAsync(id);

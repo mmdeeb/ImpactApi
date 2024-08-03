@@ -6,6 +6,7 @@ public class SubTraining : BaseAuditableEntity
 {
     public string? SubTrainingName { get; set;} 
     public string? SubTrainingDescription { get; set;}
+    public string? ImgLink { get; set; }
 
     public List<Trainer>? Trainers { get; set; } = new List<Trainer>();
    

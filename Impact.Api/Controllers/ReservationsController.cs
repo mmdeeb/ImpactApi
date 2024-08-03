@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -26,7 +26,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Reservations
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetReservations()
         {
             var reservations = await _context.reservations.ToListAsync();
@@ -63,7 +62,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Reservations/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<ReservationDTO>> GetReservation(int id)
         {
             var reservation = await _context.reservations.FindAsync(id);
@@ -101,7 +99,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Reservations/ByHall/5
         [HttpGet("ByHall/{hallId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetReservationsByHall(int hallId)
         {
             var reservations = await _context.reservations
@@ -145,7 +142,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Reservations/ByDate
         [HttpGet("ByDate")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ReservationDTO>>> GetReservationsByDate(DateTime date)
         {
             var reservations = await _context.reservations
@@ -189,7 +185,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Reservations/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutReservation(int id, ReservationDTO reservationDto)
         {
             if (id != reservationDto.Id)
@@ -280,7 +275,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Reservations
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<ReservationDTO>> PostReservation(ReservationDTO reservationDto)
         {
             var conflictingReservations = await _context.reservations
@@ -332,7 +326,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Reservations/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteReservation(int id)
         {
             var reservation = await _context.reservations
@@ -370,7 +363,6 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/Reservations/UpdateStatus/5
         [HttpPatch("UpdateStatus/{id}")]
-        [Authorize]
         public async Task<IActionResult> UpdateReservationStatus(int id)
         {
             var reservation = await _context.reservations.FindAsync(id);

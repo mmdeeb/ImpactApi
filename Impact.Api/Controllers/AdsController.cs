@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class AdsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Ads
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<AdsDTO>>> GetAds()
         {
             var adsList = await _context.ads.ToListAsync();
@@ -45,7 +43,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Ads/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<AdsDTO>> GetAds(int id)
         {
             var ads = await _context.ads.FindAsync(id);
@@ -69,7 +66,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Ads/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutAds(int id, AdsDTO adsDto)
         {
             if (id != adsDto.Id)
@@ -111,7 +107,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Ads
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<AdsDTO>> PostAds(AdsDTO adsDto)
         {
             var ads = new Ads
@@ -132,7 +127,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Ads/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteAds(int id)
         {
             var ads = await _context.ads.FindAsync(id);

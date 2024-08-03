@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ClientsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
             var clients = await _context.clients.ToListAsync();
@@ -34,9 +32,7 @@ namespace Impact.Api.Controllers
             var clientDtos = clients.Select(client => new ClientDTO
             {
                 Id = client.Id,
-                Name = client.Name,
-                Email = client.Email,
-                PhoneNumber = client.PhoneNumber,
+                UserId = client.UserId,
                 ClientAccountId = client.ClientAccountId
             }).ToList();
 
@@ -45,8 +41,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
-        [Authorize]
-        public async Task<ActionResult<ClientDTO>> GetClient(string id)
+        public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
 
@@ -58,9 +53,7 @@ namespace Impact.Api.Controllers
             var clientDto = new ClientDTO
             {
                 Id = client.Id,
-                Name = client.Name,
-                Email = client.Email,
-                PhoneNumber = client.PhoneNumber,
+                UserId = client.UserId,
                 ClientAccountId = client.ClientAccountId
             };
 
@@ -69,8 +62,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Clients/5
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> PutClient(string id, ClientDTO clientDto)
+        public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)
         {
             if (id != clientDto.Id)
             {
@@ -83,8 +75,7 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            client.Name = clientDto.Name;
-            client.PhoneNumber = clientDto.PhoneNumber;
+            client.UserId = client.UserId;
             client.ClientAccountId = clientDto.ClientAccountId;
 
             _context.Entry(client).State = EntityState.Modified;
@@ -110,7 +101,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Clients
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<ClientDTO>> PostClient(ClientDTO clientDto)
         {
             var clientAccount = new ClientAccount
@@ -125,9 +115,7 @@ namespace Impact.Api.Controllers
 
             var client = new Client
             {
-                Name = clientDto.Name,
-                Email = clientDto.Email,
-                PhoneNumber = clientDto.PhoneNumber,
+                UserId = clientDto.UserId,
                 ClientAccountId = clientAccount.Id
             };
 
@@ -135,6 +123,7 @@ namespace Impact.Api.Controllers
             await _context.SaveChangesAsync();
 
             clientDto.Id = client.Id;
+            clientDto.UserId = client.UserId;
             clientDto.ClientAccountId = client.ClientAccountId;
 
             return CreatedAtAction("GetClient", new { id = client.Id }, clientDto);
@@ -142,7 +131,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteClient(string id)
         {
             var client = await _context.clients.FindAsync(id);
@@ -157,7 +145,7 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        private bool ClientExists(string id)
+        private bool ClientExists(int id)
         {
             return _context.clients.Any(e => e.Id == id);
         }

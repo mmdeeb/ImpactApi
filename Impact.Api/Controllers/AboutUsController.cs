@@ -6,7 +6,7 @@
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.EntityFrameworkCore;
 //using Domain.Entities;
-//using ImpactBackend.Infrastructure.Persistence;
+//using ImpactApi.Infrastructure.Persistence;
 //using Microsoft.AspNetCore.Cors;
 
 //namespace Impact.Api.Controllers

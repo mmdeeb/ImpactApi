@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +15,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class EmployeesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -27,7 +26,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployees()
         {
             var employees = await _context.employees.ToListAsync();
@@ -35,9 +33,7 @@ namespace Impact.Api.Controllers
             var employeeDtos = employees.Select(employee => new EmployeeDTO
             {
                 Id = employee.Id,
-                Name = employee.Name,
-                Email = employee.Email,
-                PhoneNumber = employee.PhoneNumber,
+                UserId = employee.UserId,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -49,7 +45,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<EmployeeDTO>> GetEmployee(int id)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -63,9 +58,7 @@ namespace Impact.Api.Controllers
             {
                
                 Id = employee.Id,
-                Name = employee.Name,
-                Email = employee.Email,
-                PhoneNumber = employee.PhoneNumber,
+                UserId = employee.UserId,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -77,7 +70,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees/ByCenter/5
         [HttpGet("ByCenter/{centerId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployeesByCenter(int centerId)
         {
             var employees = await _context.employees
@@ -92,9 +84,7 @@ namespace Impact.Api.Controllers
             var employeeDtos = employees.Select(employee => new EmployeeDTO
             {
                 Id = employee.Id,
-                Name = employee.Name,
-                Email = employee.Email,
-                PhoneNumber = employee.PhoneNumber,
+                UserId = employee.UserId,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
@@ -106,8 +96,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Employees/5
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> PutEmployee(string id, EmployeeDTO employeeDto)
+        public async Task<IActionResult> PutEmployee(int id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.Id)
             {
@@ -120,9 +109,7 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
-            employee.Name = employeeDto.Name;
-            employee.Email = employeeDto.Email;
-            employee.PhoneNumber = employeeDto.PhoneNumber;
+            employee.UserId = employeeDto.UserId;
             employee.EmployeeType = employeeDto.EmployeeType;
             employee.Salary = employeeDto.Salary;
             employee.CenterId = employeeDto.CenterId;
@@ -151,7 +138,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Employees
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<EmployeeDTO>> PostEmployee(EmployeeDTO employeeDto)
         {
             var employeeAccount = new EmployeeAccount
@@ -165,9 +151,7 @@ namespace Impact.Api.Controllers
 
             var employee = new Employee
             {
-                Name = employeeDto.Name,
-                Email = employeeDto.Email,
-                PhoneNumber = employeeDto.PhoneNumber,
+                UserId = employeeDto.UserId,
                 EmployeeType = employeeDto.EmployeeType,
                 Salary = employeeDto.Salary,
                 CenterId = employeeDto.CenterId,
@@ -178,6 +162,7 @@ namespace Impact.Api.Controllers
             await _context.SaveChangesAsync();
 
             employeeDto.Id = employee.Id;
+            employeeDto.UserId = employeeDto.UserId;
             employeeDto.EmployeeAccountId = employeeAccount.Id;
 
             return CreatedAtAction("GetEmployee", new { id = employee.Id }, employeeDto);
@@ -185,7 +170,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -208,7 +192,6 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/Employees/UpdateSalary/5
         [HttpPatch("UpdateSalary/{id}")]
-        [Authorize]
         public async Task<IActionResult> UpdateEmployeeSalary(int id, [FromBody] double newSalary)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -227,7 +210,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Employees/AddSalaryToAccount/5
         [HttpPost("AddSalaryToAccount/{id}")]
-        [Authorize]
         public async Task<IActionResult> AddSalaryToEmployeeAccount(int id)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -250,7 +232,7 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        private bool EmployeeExists(string id)
+        private bool EmployeeExists(int id)
         {
             return _context.employees.Any(e => e.Id == id);
         }

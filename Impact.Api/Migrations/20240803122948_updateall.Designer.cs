@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Impact.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240714203806_t11")]
-    partial class t11
+    [Migration("20240803122948_updateall")]
+    partial class updateall
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -146,7 +146,7 @@ namespace Impact.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("AttendanceName")
+                    b.Property<DateTime>("AttendanceDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Created")
@@ -208,6 +208,41 @@ namespace Impact.Api.Migrations
                     b.ToTable("centers");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Client", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ClientAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientAccountId")
+                        .IsUnique()
+                        .HasFilter("[ClientAccountId] IS NOT NULL");
+
+                    b.ToTable("clients");
+                });
+
             modelBuilder.Entity("Domain.Entities.ClientAccount", b =>
                 {
                     b.Property<int>("Id")
@@ -240,6 +275,51 @@ namespace Impact.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("clientAccounts");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Employee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CenterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EmployeeAccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmployeeType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Salary")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CenterId");
+
+                    b.HasIndex("EmployeeAccountId")
+                        .IsUnique();
+
+                    b.ToTable("employees");
                 });
 
             modelBuilder.Entity("Domain.Entities.EmployeeAccount", b =>
@@ -282,37 +362,6 @@ namespace Impact.Api.Migrations
                     b.ToTable("employeeAccounts");
                 });
 
-            modelBuilder.Entity("Domain.Entities.FinancialFund", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("DebtOnTheFund")
-                        .HasColumnType("float");
-
-                    b.Property<double>("DebtToTheFund")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("financialFunds");
-                });
-
             modelBuilder.Entity("Domain.Entities.Hall", b =>
                 {
                     b.Property<int>("Id")
@@ -333,6 +382,9 @@ namespace Impact.Api.Migrations
                     b.Property<string>("HallName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImgLink")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -347,51 +399,6 @@ namespace Impact.Api.Migrations
                     b.HasIndex("CenterId");
 
                     b.ToTable("halls");
-                });
-
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CenterId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Debt")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmployeeName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhotoInvoiceURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("TotalBalance")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CenterId");
-
-                    b.ToTable("logisticCosts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Mail", b =>
@@ -458,6 +465,9 @@ namespace Impact.Api.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("float");
 
+                    b.Property<int>("CenterId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -470,8 +480,8 @@ namespace Impact.Api.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
+                    b.Property<string>("EmployeeName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
@@ -484,7 +494,7 @@ namespace Impact.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
+                    b.HasIndex("CenterId");
 
                     b.ToTable("otherExpenses");
                 });
@@ -520,9 +530,6 @@ namespace Impact.Api.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LogisticCostId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Payer")
                         .HasColumnType("nvarchar(max)");
 
@@ -530,8 +537,6 @@ namespace Impact.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LogisticCostId");
 
                     b.ToTable("receipts");
 
@@ -669,6 +674,9 @@ namespace Impact.Api.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImgLink")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -747,6 +755,9 @@ namespace Impact.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImgLink")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("LastModified")
@@ -885,6 +896,9 @@ namespace Impact.Api.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImgLink")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
@@ -899,7 +913,34 @@ namespace Impact.Api.Migrations
                     b.ToTable("trainingTypes");
                 });
 
-            modelBuilder.Entity("Domain.Entities.User", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -907,42 +948,176 @@ namespace Impact.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("users");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("User");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("SubTrainingTrainer", b =>
@@ -996,43 +1171,14 @@ namespace Impact.Api.Migrations
                     b.HasDiscriminator().HasValue("ReceiptToRestaurant");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Client", b =>
+            modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.HasBaseType("Domain.Entities.User");
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Property<int?>("ClientAccountId")
-                        .HasColumnType("int");
-
-                    b.HasIndex("ClientAccountId")
-                        .IsUnique()
-                        .HasFilter("[ClientAccountId] IS NOT NULL");
-
-                    b.HasDiscriminator().HasValue("Client");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Employee", b =>
-                {
-                    b.HasBaseType("Domain.Entities.User");
-
-                    b.Property<int>("CenterId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EmployeeAccountId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EmployeeType")
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Salary")
-                        .HasColumnType("float");
-
-                    b.HasIndex("CenterId");
-
-                    b.HasIndex("EmployeeAccountId")
-                        .IsUnique()
-                        .HasFilter("[EmployeeAccountId] IS NOT NULL");
-
-                    b.HasDiscriminator().HasValue("Employee");
+                    b.HasDiscriminator().HasValue("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.AdditionalCost", b =>
@@ -1057,21 +1203,38 @@ namespace Impact.Api.Migrations
                     b.Navigation("Training");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Hall", b =>
+            modelBuilder.Entity("Domain.Entities.Client", b =>
+                {
+                    b.HasOne("Domain.Entities.ClientAccount", "ClientAccount")
+                        .WithOne("Client")
+                        .HasForeignKey("Domain.Entities.Client", "ClientAccountId");
+
+                    b.Navigation("ClientAccount");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Employee", b =>
                 {
                     b.HasOne("Domain.Entities.Center", "Center")
-                        .WithMany("Halls")
+                        .WithMany("Employees")
                         .HasForeignKey("CenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.EmployeeAccount", "EmployeeAccount")
+                        .WithOne("Employee")
+                        .HasForeignKey("Domain.Entities.Employee", "EmployeeAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Center");
+
+                    b.Navigation("EmployeeAccount");
                 });
 
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
+            modelBuilder.Entity("Domain.Entities.Hall", b =>
                 {
                     b.HasOne("Domain.Entities.Center", "Center")
-                        .WithMany()
+                        .WithMany("Halls")
                         .HasForeignKey("CenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1100,20 +1263,13 @@ namespace Impact.Api.Migrations
 
             modelBuilder.Entity("Domain.Entities.OtherExpenses", b =>
                 {
-                    b.HasOne("Domain.Entities.Employee", "Employee")
+                    b.HasOne("Domain.Entities.Center", "Center")
                         .WithMany()
-                        .HasForeignKey("EmployeeId")
+                        .HasForeignKey("CenterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Employee");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Receipt", b =>
-                {
-                    b.HasOne("Domain.Entities.LogisticCost", null)
-                        .WithMany("Receipts")
-                        .HasForeignKey("LogisticCostId");
+                    b.Navigation("Center");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reservation", b =>
@@ -1198,6 +1354,57 @@ namespace Impact.Api.Migrations
                     b.Navigation("ClientAccount");
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SubTrainingTrainer", b =>
                 {
                     b.HasOne("Domain.Entities.SubTraining", null)
@@ -1246,34 +1453,6 @@ namespace Impact.Api.Migrations
                     b.Navigation("RestaurantAccount");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Client", b =>
-                {
-                    b.HasOne("Domain.Entities.ClientAccount", "ClientAccount")
-                        .WithOne("Client")
-                        .HasForeignKey("Domain.Entities.Client", "ClientAccountId");
-
-                    b.Navigation("ClientAccount");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Employee", b =>
-                {
-                    b.HasOne("Domain.Entities.Center", "Center")
-                        .WithMany("Employees")
-                        .HasForeignKey("CenterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.EmployeeAccount", "EmployeeAccount")
-                        .WithOne("Employee")
-                        .HasForeignKey("Domain.Entities.Employee", "EmployeeAccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Center");
-
-                    b.Navigation("EmployeeAccount");
-                });
-
             modelBuilder.Entity("Domain.Entities.Attendance", b =>
                 {
                     b.Navigation("Trainee");
@@ -1284,6 +1463,11 @@ namespace Impact.Api.Migrations
                     b.Navigation("Employees");
 
                     b.Navigation("Halls");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Client", b =>
+                {
+                    b.Navigation("Trainings");
                 });
 
             modelBuilder.Entity("Domain.Entities.ClientAccount", b =>
@@ -1305,11 +1489,6 @@ namespace Impact.Api.Migrations
             modelBuilder.Entity("Domain.Entities.Hall", b =>
                 {
                     b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("Domain.Entities.LogisticCost", b =>
-                {
-                    b.Navigation("Receipts");
                 });
 
             modelBuilder.Entity("Domain.Entities.RestaurantAccount", b =>
@@ -1342,11 +1521,6 @@ namespace Impact.Api.Migrations
             modelBuilder.Entity("Domain.Entities.TrainingType", b =>
                 {
                     b.Navigation("SubTraining");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Client", b =>
-                {
-                    b.Navigation("Trainings");
                 });
 #pragma warning restore 612, 618
         }

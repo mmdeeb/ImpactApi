@@ -3,7 +3,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-namespace ImpactBackend.Infrastructure.Persistence
+namespace ImpactApi.Infrastructure.Persistence
 {
     public class ApplicationDbContext : IdentityDbContext
     {

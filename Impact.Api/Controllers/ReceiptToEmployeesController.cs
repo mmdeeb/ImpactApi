@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ReceiptsToEmployeeController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsToEmployee
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ReceiptToEmployeeDTO>>> GetReceiptsToEmployee()
         {
             var receipts = await _context.receiptsToEmployee.ToListAsync();
@@ -46,7 +44,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsToEmployee/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<ReceiptToEmployeeDTO>> GetReceiptToEmployee(int id)
         {
             var receipt = await _context.receiptsToEmployee.FindAsync(id);
@@ -71,7 +68,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/ReceiptsToEmployee/ByEmployeeAccount/5
         [HttpGet("ByEmployeeAccount/{employeeAccountId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<ReceiptToEmployeeDTO>>> GetReceiptsByEmployeeAccount(int employeeAccountId)
         {
             var receipts = await _context.receiptsToEmployee
@@ -98,7 +94,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/ReceiptsToEmployee/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutReceiptToEmployee(int id, ReceiptToEmployeeDTO receiptDto)
         {
             if (id != receiptDto.Id)
@@ -155,7 +150,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/ReceiptsToEmployee
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<ReceiptToEmployeeDTO>> PostReceiptToEmployee(ReceiptToEmployeeDTO receiptDto)
         {
             var receipt = new ReceiptToEmployee
@@ -186,7 +180,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/ReceiptsToEmployee/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteReceiptToEmployee(int id)
         {
             var receipt = await _context.receiptsToEmployee.FindAsync(id);

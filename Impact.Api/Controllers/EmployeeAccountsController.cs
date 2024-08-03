@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class EmployeeAccountsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/EmployeeAccounts
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeAccountDTO>>> GetEmployeeAccounts()
         {
             var employeeAccounts = await _context.employeeAccounts.ToListAsync();
@@ -46,7 +44,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/EmployeeAccounts/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<EmployeeAccountDTO>> GetEmployeeAccount(int id)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -71,7 +68,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/EmployeeAccounts/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutEmployeeAccount(int id, EmployeeAccountDTO employeeAccountDto)
         {
             if (id != employeeAccountDto.Id)
@@ -114,7 +110,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/EmployeeAccounts
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<EmployeeAccountDTO>> PostEmployeeAccount(EmployeeAccountDTO employeeAccountDto)
         {
             var employeeAccount = new EmployeeAccount
@@ -136,7 +131,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/EmployeeAccounts/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteEmployeeAccount(int id)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -153,7 +147,6 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddDeduct/5
         [HttpPatch("AddDeduct/{id}")]
-        [Authorize]
         public async Task<IActionResult> AddDeduct(int id, [FromBody] double deduct)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -173,7 +166,6 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddAdvancePayment/5
         [HttpPatch("AddAdvancePayment/{id}")]
-        [Authorize]
         public async Task<IActionResult> AddAdvancePayment(int id, [FromBody] double advancePayment)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -193,7 +185,6 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddReward/5
         [HttpPatch("AddReward/{id}")]
-        [Authorize]
         public async Task<IActionResult> AddReward(int id, [FromBody] double reward)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);

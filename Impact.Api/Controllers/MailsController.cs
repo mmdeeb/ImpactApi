@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class MailsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Mails
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MailDTO>>> GetMails()
         {
             var mails = await _context.mails.ToListAsync();
@@ -49,7 +47,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Mails/ByInvoice/5
         [HttpGet("ByInvoice/{trainingInvoiceId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MailDTO>>> GetMailsByInvoice(int trainingInvoiceId)
         {
             var mails = await _context.mails
@@ -79,7 +76,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Mails/ByRestaurantAccount/5
         [HttpGet("ByRestaurantAccount/{restaurantAccountId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<MailDTO>>> GetMailsByRestaurantAccount(int restaurantAccountId)
         {
             var mails = await _context.mails
@@ -109,7 +105,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/Mails/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<MailDTO>> GetMail(int id)
         {
             var mail = await _context.mails.FindAsync(id);
@@ -137,7 +132,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Mails/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutMail(int id, MailDTO mailDto)
         {
             if (id != mailDto.Id)
@@ -215,7 +209,6 @@ namespace Impact.Api.Controllers
 
         // POST: api/Mails
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<MailDTO>> PostMail(MailDTO mailDto)
         {
             var mail = new Mail
@@ -265,7 +258,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Mails/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteMail(int id)
         {
             var mail = await _context.mails.FindAsync(id);

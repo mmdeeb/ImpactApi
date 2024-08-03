@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Impact.Api.Models;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class FinancialFundsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/FinancialFunds
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<FinancialFundDTO>> GetFinancialFund()
         {
             var totalRestaurantDebt = await _context.restaurantAccounts.SumAsync(r => r.Debt);

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using ImpactBackend.Infrastructure.Persistence;
+using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 
@@ -14,7 +14,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class SubTrainingsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,7 +25,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainings()
         {
             var subTrainings = await _context.subTrainings.ToListAsync();
@@ -35,6 +33,7 @@ namespace Impact.Api.Controllers
             {
                 Id = st.Id,
                 SubTrainingName = st.SubTrainingName,
+                ImgLink = st.ImgLink,
                 SubTrainingDescription = st.SubTrainingDescription,
                 TrainingTypeId = st.TrainingTypeId
             }).ToList();
@@ -44,7 +43,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<SubTrainingDTO>> GetSubTraining(int id)
         {
             var subTraining = await _context.subTrainings.FirstOrDefaultAsync(st => st.Id == id);
@@ -58,6 +56,7 @@ namespace Impact.Api.Controllers
             {
                 Id = subTraining.Id,
                 SubTrainingName = subTraining.SubTrainingName,
+                ImgLink = subTraining.ImgLink,
                 SubTrainingDescription = subTraining.SubTrainingDescription,
                 TrainingTypeId = subTraining.TrainingTypeId
             };
@@ -67,7 +66,6 @@ namespace Impact.Api.Controllers
 
         // GET: api/SubTrainings/GetSubTrainingsByTrainer/5
         [HttpGet("GetSubTrainingsByTrainer/{trainerId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainingsByTrainer(int trainerId)
         {
             var subTrainings = await _context.trainers
@@ -85,6 +83,7 @@ namespace Impact.Api.Controllers
             {
                 Id = st.Id,
                 SubTrainingName = st.SubTrainingName,
+                ImgLink = st.ImgLink,
                 SubTrainingDescription = st.SubTrainingDescription,
                 TrainingTypeId = st.TrainingTypeId
             }).ToList();
@@ -94,7 +93,6 @@ namespace Impact.Api.Controllers
 
         // PUT: api/SubTrainings/5
         [HttpPut("{id}")]
-        [Authorize]
         public async Task<IActionResult> PutSubTraining(int id, SubTrainingDTO subTrainingDto)
         {
             if (id != subTrainingDto.Id)
@@ -109,6 +107,7 @@ namespace Impact.Api.Controllers
             }
 
             subTraining.SubTrainingName = subTrainingDto.SubTrainingName;
+            subTraining.ImgLink = subTrainingDto.ImgLink;
             subTraining.SubTrainingDescription = subTrainingDto.SubTrainingDescription;
             subTraining.TrainingTypeId = subTrainingDto.TrainingTypeId;
 
@@ -135,12 +134,12 @@ namespace Impact.Api.Controllers
 
         // POST: api/SubTrainings
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<SubTrainingDTO>> PostSubTraining(SubTrainingDTO subTrainingDto)
         {
             var subTraining = new SubTraining
             {
                 SubTrainingName = subTrainingDto.SubTrainingName,
+                ImgLink = subTrainingDto.ImgLink,
                 SubTrainingDescription = subTrainingDto.SubTrainingDescription,
                 TrainingTypeId = subTrainingDto.TrainingTypeId
             };
@@ -187,6 +186,7 @@ namespace Impact.Api.Controllers
             {
                 Id = subTraining.Id,
                 SubTrainingName = subTraining.SubTrainingName,
+                ImgLink = subTraining.ImgLink,
                 SubTrainingDescription = subTraining.SubTrainingDescription,
                 TrainingTypeId = subTraining.TrainingTypeId
             };
@@ -196,7 +196,6 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/SubTrainings/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteSubTraining(int id)
         {
             var subTraining = await _context.subTrainings.FindAsync(id);
