@@ -12,6 +12,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TrainingTypesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -26,8 +27,7 @@ namespace Impact.Api.Controllers
         public async Task<ActionResult<IEnumerable<TrainingTypeDTO>>> GetTrainingTypes()
         {
             var trainingTypes = await _context.trainingTypes.ToListAsync();
-
-            var trainingTypeDTOs = trainingTypes.Select(tt => new TrainingTypeDTO
+           var trainingTypeDTOs = trainingTypes.Select(tt => new TrainingTypeDTO
             {
                 Id = tt.Id,
                 TrainingTypeName = tt.TrainingTypeName,

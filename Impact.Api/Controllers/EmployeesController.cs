@@ -94,6 +94,30 @@ namespace Impact.Api.Controllers
             return Ok(employeeDtos);
         }
 
+        // GET: api/Clients/by-user/{userId}
+        [HttpGet("by-user/{userId}")]
+        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByUserId(Guid userId)
+        {
+            var employee = await _context.employees.FirstOrDefaultAsync(e => e.UserId == userId);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            var employeeDto = new EmployeeDTO
+            {
+                Id = employee.Id,
+                UserId = employee.UserId,
+                EmployeeType = employee.EmployeeType,
+                Salary = employee.Salary,
+                CenterId = employee.CenterId,
+                EmployeeAccountId = employee.EmployeeAccountId
+            };
+
+            return Ok(employeeDto);
+        }
+
         // PUT: api/Employees/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutEmployee(int id, EmployeeDTO employeeDto)

@@ -60,6 +60,27 @@ namespace Impact.Api.Controllers
             return Ok(clientDto);
         }
 
+        // GET: api/Clients/by-user/{userId}
+        [HttpGet("by-user/{userId}")]
+        public async Task<ActionResult<ClientDTO>> GetClientByUserId(Guid userId)
+        {
+            var client = await _context.clients.FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (client == null)
+            {
+                return NotFound();
+            }
+
+            var clientDto = new ClientDTO
+            {
+                Id = client.Id,
+                UserId = client.UserId,
+                ClientAccountId = client.ClientAccountId
+            };
+
+            return Ok(clientDto);
+        }
+
         // PUT: api/Clients/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)

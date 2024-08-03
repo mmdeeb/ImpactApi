@@ -38,7 +38,7 @@ options.UseSqlServer(
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+builder.Services.AddIdentityApiEndpoints<User>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -90,7 +90,7 @@ else
 
 app.UseCors("AllowAll");
 
-app.MapIdentityApi<IdentityUser>();
+app.MapIdentityApi<User>();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -101,7 +101,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
     string[] roleNames = { "Admin", "CenterDirector", "Facilitator", "Client" };
     foreach (var roleName in roleNames)
@@ -109,21 +109,6 @@ using (var scope = app.Services.CreateScope())
         if (!await roleManager.RoleExistsAsync(roleName))
         {
             await roleManager.CreateAsync(new IdentityRole(roleName));
-        }
-    }
-
-    // Create a default admin user
-    var adminEmail = "mmdeeb@gmail.com";
-    var adminPassword = "Admin@1234";
-
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
-    {
-        adminUser = new User { UserName = adminEmail, Email = adminEmail, Name = "Admin" };
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
 }
