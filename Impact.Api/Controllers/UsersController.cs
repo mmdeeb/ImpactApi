@@ -40,10 +40,10 @@ namespace Impact.Api.Controllers
         }
 
         // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserDTO>> GetUser(string id)
+        [HttpGet("{email}")]
+        public async Task<ActionResult<UserDTO>> GetUser(string email)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
