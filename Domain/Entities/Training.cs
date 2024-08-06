@@ -19,6 +19,6 @@ public class Training : BaseAuditableEntity
   
     public List<Reservation>? Reservations { get; set; } = new List<Reservation>(); 
      
-    public Client? Clint { get; set; } 
+    public Client? Client { get; set; } 
     public int ClientId { get; set; } 
 }

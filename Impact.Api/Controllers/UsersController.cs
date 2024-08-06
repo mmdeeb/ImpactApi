@@ -63,10 +63,10 @@ namespace Impact.Api.Controllers
         }
 
         // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(string id, UpdateUserDTO updateUserDto)
+        [HttpPut("{email}")]
+        public async Task<IActionResult> PutUser(string email, UpdateUserDTO updateUserDto)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 return NotFound();
