@@ -12,7 +12,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class TrainingTypesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
