@@ -11,7 +11,6 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -22,6 +21,7 @@ namespace Impact.Api.Controllers
         }
         // GET: api/Users
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetUsers()
         {
 
@@ -41,6 +41,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Users/5
         [HttpGet("{email}")]
+        [Authorize]
         public async Task<ActionResult<UserDTO>> GetUser(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -64,6 +65,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Users/5
         [HttpPut("{email}")]
+        [Authorize]
         public async Task<IActionResult> PutUser(string email, UpdateUserDTO updateUserDto)
         {
             var user = await _userManager.FindByEmailAsync(email);
