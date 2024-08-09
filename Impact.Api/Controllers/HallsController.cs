@@ -91,6 +91,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Halls/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutHall(int id, HallDTO hallDto)
         {
             if (id != hallDto.Id)
@@ -132,6 +133,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Halls
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<HallDTO>> PostHall(HallDTO hallDto)
         {
             var hall = new Hall
@@ -153,6 +155,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Halls/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHall(int id)
         {
             var hall = await _context.halls.FindAsync(id);

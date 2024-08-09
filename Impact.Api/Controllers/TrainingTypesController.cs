@@ -59,6 +59,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/TrainingTypes/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutTrainingType(int id, TrainingTypeDTO trainingTypeDTO)
         {
             if (id != trainingTypeDTO.Id)
@@ -98,6 +99,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/TrainingTypes
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TrainingTypeDTO>> PostTrainingType(TrainingTypeDTO trainingTypeDTO)
         {
             var trainingType = new TrainingType
@@ -116,6 +118,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/TrainingTypes/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTrainingType(int id)
         {
             var trainingType = await _context.trainingTypes.FindAsync(id);

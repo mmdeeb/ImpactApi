@@ -25,6 +25,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<ClientDTO>>> GetClients()
         {
             var clients = await _context.clients.ToListAsync();
@@ -41,6 +42,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
@@ -62,7 +64,8 @@ namespace Impact.Api.Controllers
 
         // GET: api/Clients/by-user/{userId}
         [HttpGet("by-user/{userId}")]
-        public async Task<ActionResult<ClientDTO>> GetClientByUserId(Guid userId)
+        [Authorize]
+        public async Task<ActionResult<ClientDTO>> GetClientByUserId(string userId)
         {
             var client = await _context.clients.FirstOrDefaultAsync(c => c.UserId == userId);
 
@@ -83,6 +86,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Clients/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutClient(int id, ClientDTO clientDto)
         {
             if (id != clientDto.Id)
@@ -122,6 +126,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Clients
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ClientDTO>> PostClient(ClientDTO clientDto)
         {
             var clientAccount = new ClientAccount
@@ -152,6 +157,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteClient(string id)
         {
             var client = await _context.clients.FindAsync(id);

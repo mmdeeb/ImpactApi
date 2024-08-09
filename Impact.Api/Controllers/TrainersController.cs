@@ -99,6 +99,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Trainers/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutTrainer(int id, TrainerDTO trainerDto)
         {
             if (id != trainerDto.Id)
@@ -142,6 +143,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainers
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TrainerDTO>> PostTrainer(TrainerDTO trainerDto)
         {
             var trainer = new Trainer
@@ -164,6 +166,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainers/5/AddSubTrainings
         [HttpPost("{trainerId}/AddSubTrainings")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TrainerDTO>> AddSubTrainingsToTrainer(int trainerId, [FromBody] List<int> subTrainingIds)
         {
             var trainer = await _context.trainers
@@ -208,6 +211,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Trainers/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTrainer(int id)
         {
             var trainer = await _context.trainers.FindAsync(id);

@@ -14,6 +14,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReservationsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -184,6 +185,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Reservations/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutReservation(int id, ReservationDTO reservationDto)
         {
             if (id != reservationDto.Id)
@@ -274,6 +276,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Reservations
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ReservationDTO>> PostReservation(ReservationDTO reservationDto)
         {
             var conflictingReservations = await _context.reservations
@@ -325,6 +328,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Reservations/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteReservation(int id)
         {
             var reservation = await _context.reservations

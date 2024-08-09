@@ -14,6 +14,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TrainingsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -25,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainings
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetTrainings()
         {
             var trainings = await _context.trainings.ToListAsync();
@@ -44,6 +46,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainings/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<TrainingDTO>> GetTraining(int id)
         {
             var training = await _context.trainings.FindAsync(id);
@@ -68,6 +71,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainings/ByClient/5
         [HttpGet("ByClient/{clientId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetTrainingsByClient(int clientId)
         {
             var trainings = await _context.trainings
@@ -94,6 +98,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Trainings/ByInvoice/5
         [HttpGet("ByInvoice/{trainingInvoiceId}")]
+        [Authorize]
         public async Task<ActionResult<TrainingDTO>> GetTrainingByInvoice(int trainingInvoiceId)
         {
             var training = await _context.trainings
@@ -119,6 +124,7 @@ namespace Impact.Api.Controllers
  
         // PUT: api/Trainings/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutTraining(int id, TrainingDTO trainingDto)
         {
             if (id != trainingDto.Id)
@@ -159,16 +165,15 @@ namespace Impact.Api.Controllers
 
         // POST: api/Trainings
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<TrainingDTO>> PostTraining(TrainingDTO trainingDto)
         {
-            // تحقق من وجود العميل
             var client = await _context.clients.FindAsync(trainingDto.ClientId);
             if (client == null)
             {
                 return BadRequest(new { Message = "Client not found" });
             }
 
-            // إنشاء فاتورة تدريب جديدة بقيم صفرية
             var trainingInvoice = new TrainingInvoice
             {
                 MealsCost = 0,
@@ -184,7 +189,6 @@ namespace Impact.Api.Controllers
             _context.trainingInvoices.Add(trainingInvoice);
             await _context.SaveChangesAsync();
 
-            // إنشاء التدريب وربط فاتورة التدريب الجديدة به
             var training = new Training
             {
                 TrainingName = trainingDto.TrainingName,
@@ -205,6 +209,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Trainings/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTraining(int id)
         {
             var training = await _context.trainings.FindAsync(id);

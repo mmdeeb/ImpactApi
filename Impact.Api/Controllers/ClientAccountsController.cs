@@ -14,6 +14,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ClientAccountsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -64,6 +65,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/ClientAccounts/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutClientAccount(int id, ClientAccountDTO clientAccountDto)
         {
             if (id != clientAccountDto.Id)
@@ -104,6 +106,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/ClientAccounts
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ClientAccountDTO>> PostClientAccount(ClientAccountDTO clientAccountDto)
         {
             var clientAccount = new ClientAccount
@@ -123,7 +126,8 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/ClientAccounts/5
         [HttpDelete("{id}")]
-          public async Task<IActionResult> DeleteClientAccount(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteClientAccount(int id)
         {
             var clientAccount = await _context.clientAccounts.FindAsync(id);
             if (clientAccount == null)

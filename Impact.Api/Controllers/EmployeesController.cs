@@ -26,6 +26,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployees()
         {
             var employees = await _context.employees.ToListAsync();
@@ -45,6 +46,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<EmployeeDTO>> GetEmployee(int id)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -70,6 +72,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/Employees/ByCenter/5
         [HttpGet("ByCenter/{centerId}")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployeesByCenter(int centerId)
         {
             var employees = await _context.employees
@@ -94,9 +97,10 @@ namespace Impact.Api.Controllers
             return Ok(employeeDtos);
         }
 
-        // GET: api/Clients/by-user/{userId}
+        // GET: api/Employees/by-user/{userId}
         [HttpGet("by-user/{userId}")]
-        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByUserId(Guid userId)
+        [Authorize]
+        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByUserId(string userId)
         {
             var employee = await _context.employees.FirstOrDefaultAsync(e => e.UserId == userId);
 
@@ -120,6 +124,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Employees/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutEmployee(int id, EmployeeDTO employeeDto)
         {
             if (id != employeeDto.Id)
@@ -162,6 +167,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Employees
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<EmployeeDTO>> PostEmployee(EmployeeDTO employeeDto)
         {
             var employeeAccount = new EmployeeAccount
@@ -194,6 +200,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Employees/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -216,6 +223,7 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/Employees/UpdateSalary/5
         [HttpPatch("UpdateSalary/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateEmployeeSalary(int id, [FromBody] double newSalary)
         {
             var employee = await _context.employees.FindAsync(id);
@@ -234,6 +242,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Employees/AddSalaryToAccount/5
         [HttpPost("AddSalaryToAccount/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddSalaryToEmployeeAccount(int id)
         {
             var employee = await _context.employees.FindAsync(id);

@@ -14,6 +14,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AttendancesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

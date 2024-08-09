@@ -14,6 +14,7 @@ namespace Impact.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TrainingInvoicesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -96,6 +97,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/TrainingInvoices/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutTrainingInvoice(int id, TrainingInvoiceDTO trainingInvoiceDto)
         {
             if (id != trainingInvoiceDto.Id)
@@ -141,6 +143,7 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/TrainingInvoices/UpdateDiscount/5
         [HttpPatch("UpdateDiscount/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDiscount(int id, [FromBody] double discount)
         {
             var trainingInvoice = await _context.trainingInvoices.FindAsync(id);
@@ -160,6 +163,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/TrainingInvoices/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTrainingInvoice(int id)
         {
             var trainingInvoice = await _context.trainingInvoices.FindAsync(id);

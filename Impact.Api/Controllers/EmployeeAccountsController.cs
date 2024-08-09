@@ -25,6 +25,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/EmployeeAccounts
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<EmployeeAccountDTO>>> GetEmployeeAccounts()
         {
             var employeeAccounts = await _context.employeeAccounts.ToListAsync();
@@ -44,6 +45,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/EmployeeAccounts/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<EmployeeAccountDTO>> GetEmployeeAccount(int id)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -68,6 +70,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/EmployeeAccounts/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutEmployeeAccount(int id, EmployeeAccountDTO employeeAccountDto)
         {
             if (id != employeeAccountDto.Id)
@@ -110,6 +113,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/EmployeeAccounts
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<EmployeeAccountDTO>> PostEmployeeAccount(EmployeeAccountDTO employeeAccountDto)
         {
             var employeeAccount = new EmployeeAccount
@@ -131,6 +135,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/EmployeeAccounts/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployeeAccount(int id)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -147,6 +152,7 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddDeduct/5
         [HttpPatch("AddDeduct/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddDeduct(int id, [FromBody] double deduct)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -166,6 +172,7 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddAdvancePayment/5
         [HttpPatch("AddAdvancePayment/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddAdvancePayment(int id, [FromBody] double advancePayment)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);
@@ -185,6 +192,7 @@ namespace Impact.Api.Controllers
 
         // PATCH: api/EmployeeAccounts/AddReward/5
         [HttpPatch("AddReward/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddReward(int id, [FromBody] double reward)
         {
             var employeeAccount = await _context.employeeAccounts.FindAsync(id);

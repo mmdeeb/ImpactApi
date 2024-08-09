@@ -66,6 +66,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/Ads/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutAds(int id, AdsDTO adsDto)
         {
             if (id != adsDto.Id)
@@ -107,6 +108,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/Ads
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<AdsDTO>> PostAds(AdsDTO adsDto)
         {
             var ads = new Ads
@@ -127,6 +129,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/Ads/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAds(int id)
         {
             var ads = await _context.ads.FindAsync(id);

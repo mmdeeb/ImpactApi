@@ -21,7 +21,7 @@ namespace Impact.Api.Controllers
         }
         // GET: api/Users
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<TrainingDTO>>> GetUsers()
         {
 
@@ -85,6 +85,28 @@ namespace Impact.Api.Controllers
             }
 
     
+
+            return NoContent();
+        }
+
+        // DELETE: api/Users/{email}
+        [HttpDelete("{email}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteUser(string email)
+        {
+            // البحث عن المستخدم بواسطة البريد الإلكتروني
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // حذف المستخدم
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
 
             return NoContent();
         }

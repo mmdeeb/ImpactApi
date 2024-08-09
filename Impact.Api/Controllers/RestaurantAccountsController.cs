@@ -25,6 +25,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/RestaurantAccounts
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RestaurantAccountDTO>>> GetRestaurantAccounts()
         {
             var restaurantAccounts = await _context.restaurantAccounts.ToListAsync();
@@ -42,6 +43,7 @@ namespace Impact.Api.Controllers
 
         // GET: api/RestaurantAccounts/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<RestaurantAccountDTO>> GetRestaurantAccount(int id)
         {
             var restaurantAccount = await _context.restaurantAccounts.FindAsync(id);
@@ -64,6 +66,7 @@ namespace Impact.Api.Controllers
 
         // PUT: api/RestaurantAccounts/5
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PutRestaurantAccount(int id, RestaurantAccountDTO restaurantAccountDto)
         {
             if (id != restaurantAccountDto.Id)
@@ -103,6 +106,7 @@ namespace Impact.Api.Controllers
 
         // POST: api/RestaurantAccounts
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<RestaurantAccountDTO>> PostRestaurantAccount(RestaurantAccountDTO restaurantAccountDto)
         {
             var restaurantAccount = new RestaurantAccount
@@ -121,6 +125,7 @@ namespace Impact.Api.Controllers
 
         // DELETE: api/RestaurantAccounts/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRestaurantAccount(int id)
         {
             var restaurantAccount = await _context.restaurantAccounts.FindAsync(id);
