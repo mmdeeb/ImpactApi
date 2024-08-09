@@ -30,7 +30,6 @@ namespace Impact.Api.Controllers
             {
                 Id = user.Id,
                 Name = user.Name,
-                UserName = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
 
@@ -55,7 +54,6 @@ namespace Impact.Api.Controllers
             {
                 Id = user.Id,
                 Name = user.Name,
-                UserName = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
             };
@@ -75,7 +73,6 @@ namespace Impact.Api.Controllers
             }
 
             user.Name = updateUserDto.Name;
-            user.UserName = updateUserDto.UserName;
             user.PhoneNumber = updateUserDto.PhoneNumber;
 
             var result = await _userManager.UpdateAsync(user);
@@ -114,7 +111,6 @@ namespace Impact.Api.Controllers
     }
     public class UpdateUserDTO
     {
-        public string? UserName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Name { get; set; }
     }
