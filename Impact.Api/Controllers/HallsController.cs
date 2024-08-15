@@ -89,6 +89,74 @@ namespace Impact.Api.Controllers
             return Ok(hallDtos);
         }
 
+        // GET: api/Halls/5/Availability
+        [HttpGet("{id}/Availability")]
+        public async Task<ActionResult<HallAvailabilityDTO>> GetHallAvailability(int id)
+        {
+            var hall = await _context.halls
+                .Include(h => h.Reservations)
+                .FirstOrDefaultAsync(h => h.Id == id);
+
+            if (hall == null)
+            {
+                return NotFound();
+            }
+
+            var now = DateTime.Now;
+
+            var lastReservationEndTime = hall.Reservations.Any()
+                ? hall.Reservations.Max(r => r.EndTime)
+                : now;
+
+            var endOfLastReservationDay = lastReservationEndTime.Date.AddHours(23).AddMinutes(59);
+
+            var dayGroups = hall.Reservations
+                .GroupBy(r => r.StartTime.Date)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var dayAvailabilities = new List<DayAvailabilityDTO>();
+
+            for (var date = now.Date; date <= endOfLastReservationDay.Date; date = date.AddDays(1))
+            {
+                var dayAvailability = new DayAvailabilityDTO
+                {
+                    Date = date
+                };
+
+                var startOfDay = date.AddHours(8);
+                var endOfDay = date.AddHours(20);
+
+                for (var time = startOfDay; time < endOfDay; time = time.AddHours(1))
+                {
+                    var isReserved = dayGroups.ContainsKey(date) &&
+                                     dayGroups[date].Any(r => r.StartTime < time.AddHours(1) && r.EndTime > time);
+
+                    if (isReserved)
+                    {
+                        dayAvailability.ReservedSlots.Add(time);
+                    }
+                    else
+                    {
+                        if (time >= now) 
+                        {
+                            dayAvailability.AvailableSlots.Add(time);
+                        }
+                    }
+                }
+
+                dayAvailabilities.Add(dayAvailability);
+            }
+
+            var hallAvailabilityDto = new HallAvailabilityDTO
+            {
+                HallId = hall.Id,
+                HallName = hall.HallName,
+                DayAvailabilities = dayAvailabilities
+            };
+
+            return Ok(hallAvailabilityDto);
+        }
+
         // PUT: api/Halls/5
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
