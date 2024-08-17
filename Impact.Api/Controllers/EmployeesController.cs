@@ -100,7 +100,7 @@ namespace Impact.Api.Controllers
         // GET: api/Employees/by-user/{userId}
         [HttpGet("by-user/{userId}")]
         [Authorize]
-        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByUserId(string userId)
+        public async Task<ActionResult<EmployeeDTO>> GetEmployeeByUserId(Guid userId)
         {
             var employee = await _context.employees.FirstOrDefaultAsync(e => e.UserId == userId);
 

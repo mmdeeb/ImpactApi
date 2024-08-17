@@ -65,7 +65,7 @@ namespace Impact.Api.Controllers
         // GET: api/Clients/by-user/{userId}
         [HttpGet("by-user/{userId}")]
         [Authorize]
-        public async Task<ActionResult<ClientDTO>> GetClientByUserId(string userId)
+        public async Task<ActionResult<ClientDTO>> GetClientByUserId(Guid userId)
         {
             var client = await _context.clients.FirstOrDefaultAsync(c => c.UserId == userId);
 

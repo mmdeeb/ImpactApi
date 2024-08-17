@@ -4,7 +4,7 @@ namespace Domain.Entities;
 
 public class Employee : BaseAuditableEntity
 {
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
     public string? EmployeeType { get; set; }
     public double Salary { get; set; }
 
