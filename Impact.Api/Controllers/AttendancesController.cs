@@ -63,6 +63,31 @@ namespace Impact.Api.Controllers
             return Ok(attendanceDto);
         }
 
+
+        [HttpGet("ByTraining/{trainingId}")]
+        public async Task<ActionResult<IEnumerable<AttendanceDTO>>> GetAttendancesByTraining(int trainingId)
+        {
+            var attendances = await _context.attendances
+                                             .Where(a => a.TrainingId == trainingId)
+                                             .Include(a => a.Training)
+                                             .ToListAsync();
+
+            if (attendances == null || !attendances.Any())
+            {
+                return NotFound(new { Message = "No attendances found for the specified training ID" });
+            }
+
+            var attendanceDtos = attendances.Select(attendance => new AttendanceDTO
+            {
+                Id = attendance.Id,
+                AttendanceDate = attendance.AttendanceDate,
+                TrainingId = attendance.TrainingId,
+                TrainingName = attendance.Training?.TrainingName
+            }).ToList();
+
+            return Ok(attendanceDtos);
+        }
+
         // GET: api/Attendances/Trainees/5
         [HttpGet("Trainees/{attendanceId}")]
         public async Task<ActionResult<IEnumerable<TraineeDTO>>> GetTraineesByAttendance(int attendanceId)
