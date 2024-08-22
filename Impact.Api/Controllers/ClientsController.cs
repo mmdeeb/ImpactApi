@@ -9,6 +9,7 @@ using Domain.Entities;
 using ImpactApi.Infrastructure.Persistence;
 using Impact.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Impact.Api.Controllers
 {
@@ -17,12 +18,14 @@ namespace Impact.Api.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public ClientsController(ApplicationDbContext context)
+        public ClientsController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
-
+        
         // GET: api/Clients
         [HttpGet]
         [Authorize]
@@ -30,12 +33,27 @@ namespace Impact.Api.Controllers
         {
             var clients = await _context.clients.ToListAsync();
 
-            var clientDtos = clients.Select(client => new ClientDTO
+            var clientDtos = new List<ClientDTO>();
+
+            foreach (var client in clients)
             {
-                Id = client.Id,
-                UserId = client.UserId,
-                ClientAccountId = client.ClientAccountId
-            }).ToList();
+                var user = await _userManager.FindByIdAsync(client.UserId.ToString());
+
+                if (user != null)
+                {
+                    var clientDto = new ClientDTO
+                    {
+                        Id = client.Id,
+                        UserId = client.UserId,
+                        ClientAccountId = client.ClientAccountId,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber
+                    };
+
+                    clientDtos.Add(clientDto);
+                }
+            }
 
             return Ok(clientDtos);
         }
@@ -46,6 +64,7 @@ namespace Impact.Api.Controllers
         public async Task<ActionResult<ClientDTO>> GetClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
+            var user = await _userManager.FindByIdAsync(client.UserId.ToString());
 
             if (client == null)
             {
@@ -56,7 +75,10 @@ namespace Impact.Api.Controllers
             {
                 Id = client.Id,
                 UserId = client.UserId,
-                ClientAccountId = client.ClientAccountId
+                ClientAccountId = client.ClientAccountId,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
             };
 
             return Ok(clientDto);

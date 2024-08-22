@@ -18,10 +18,12 @@ namespace Impact.Api.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public EmployeesController(ApplicationDbContext context)
+        public EmployeesController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Employees
@@ -30,16 +32,30 @@ namespace Impact.Api.Controllers
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployees()
         {
             var employees = await _context.employees.ToListAsync();
+            var employeeDtos = new List<EmployeeDTO>();
 
-            var employeeDtos = employees.Select(employee => new EmployeeDTO
+            foreach (var employee in employees)
             {
-                Id = employee.Id,
-                UserId = employee.UserId,
-                EmployeeType = employee.EmployeeType,
-                Salary = employee.Salary,
-                CenterId = employee.CenterId,
-                EmployeeAccountId = employee.EmployeeAccountId
-            }).ToList();
+                var user = await _userManager.FindByIdAsync(employee.UserId.ToString());
+
+                if (user != null)
+                {
+                    var employeeDto = new EmployeeDTO
+                    {
+                        Id = employee.Id,
+                        UserId = employee.UserId,
+                        EmployeeType = employee.EmployeeType,
+                        Salary = employee.Salary,
+                        CenterId = employee.CenterId,
+                        EmployeeAccountId = employee.EmployeeAccountId,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber
+                    };
+
+                    employeeDtos.Add(employeeDto);
+                }
+            }
 
             return Ok(employeeDtos);
         }
@@ -56,15 +72,24 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
+            var user = await _userManager.FindByIdAsync(employee.UserId.ToString());
+
+            if (user == null)
+            {
+                return NotFound($"User with ID {employee.UserId} not found.");
+            }
+
             var employeeDto = new EmployeeDTO
             {
-               
                 Id = employee.Id,
                 UserId = employee.UserId,
                 EmployeeType = employee.EmployeeType,
                 Salary = employee.Salary,
                 CenterId = employee.CenterId,
-                EmployeeAccountId = employee.EmployeeAccountId
+                EmployeeAccountId = employee.EmployeeAccountId,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
             };
 
             return Ok(employeeDto);
@@ -76,23 +101,38 @@ namespace Impact.Api.Controllers
         public async Task<ActionResult<IEnumerable<EmployeeDTO>>> GetEmployeesByCenter(int centerId)
         {
             var employees = await _context.employees
-                                          .Where(e => e.CenterId == centerId)
-                                          .ToListAsync();
+                                       .Where(e => e.CenterId == centerId)
+                                       .ToListAsync();
 
             if (!employees.Any())
             {
                 return NotFound();
             }
 
-            var employeeDtos = employees.Select(employee => new EmployeeDTO
+            var employeeDtos = new List<EmployeeDTO>();
+
+            foreach (var employee in employees)
             {
-                Id = employee.Id,
-                UserId = employee.UserId,
-                EmployeeType = employee.EmployeeType,
-                Salary = employee.Salary,
-                CenterId = employee.CenterId,
-                EmployeeAccountId = employee.EmployeeAccountId
-            }).ToList();
+                var user = await _userManager.FindByIdAsync(employee.UserId.ToString());
+
+                if (user != null)
+                {
+                    var employeeDto = new EmployeeDTO
+                    {
+                        Id = employee.Id,
+                        UserId = employee.UserId,
+                        EmployeeType = employee.EmployeeType,
+                        Salary = employee.Salary,
+                        CenterId = employee.CenterId,
+                        EmployeeAccountId = employee.EmployeeAccountId,
+                        Name = user.Name,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber
+                    };
+
+                    employeeDtos.Add(employeeDto);
+                }
+            }
 
             return Ok(employeeDtos);
         }
