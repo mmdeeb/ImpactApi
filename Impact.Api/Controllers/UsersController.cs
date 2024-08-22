@@ -62,6 +62,29 @@ namespace Impact.Api.Controllers
             return Ok(userDto);
         }
 
+        // GET: api/Users/5
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<ActionResult<UserDTO>> GetUserById(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var userDto = new UserDTO
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+            };
+
+            return Ok(userDto);
+        }
+
         // PUT: api/Users/5
         [HttpPut("{email}")]
         [Authorize]
