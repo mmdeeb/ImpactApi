@@ -180,7 +180,7 @@ namespace Impact.Api.Controllers
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteClient(string id)
+        public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await _context.clients.FindAsync(id);
             if (client == null)

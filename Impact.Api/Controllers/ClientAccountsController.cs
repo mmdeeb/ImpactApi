@@ -124,6 +124,42 @@ namespace Impact.Api.Controllers
             return CreatedAtAction("GetClientAccount", new { id = clientAccount.Id }, clientAccountDto);
         }
 
+        // PUT: api/ClientAccounts/{id}/discount
+        [HttpPut("{id}/discount")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ApplyDiscount(int id, [FromBody] double discount)
+        {
+            var clientAccount = await _context.clientAccounts.FindAsync(id);
+            if (clientAccount == null)
+            {
+                return NotFound();
+            }
+
+            // Update the Discount
+            clientAccount.Discount += discount;
+            clientAccount.TotalBalance -= discount;
+
+            _context.Entry(clientAccount).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ClientAccountExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
         // DELETE: api/ClientAccounts/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
