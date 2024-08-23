@@ -40,7 +40,7 @@ namespace Impact.Api.Controllers
         }
 
         // GET: api/Users/5
-        [HttpGet("{email}")]
+        [HttpGet("{email}")]    
         [Authorize]
         public async Task<ActionResult<UserDTO>> GetUser(string email)
         {
@@ -63,7 +63,7 @@ namespace Impact.Api.Controllers
         }
 
         // GET: api/Users/5
-        [HttpGet("{id}")]
+        [HttpGet("id/{id}")]
         [Authorize]
         public async Task<ActionResult<UserDTO>> GetUserById(string id)
         {
