@@ -197,6 +197,31 @@ namespace Impact.Api.Controllers
             return Ok(subTrainingDto);
         }
 
+        // GET: api/SubTrainings/GetSubTrainingsByTrainingType/5
+        [HttpGet("GetSubTrainingsByTrainingType/{trainingTypeId}")]
+        public async Task<ActionResult<IEnumerable<SubTrainingDTO>>> GetSubTrainingsByTrainingType(int trainingTypeId)
+        {
+            var subTrainings = await _context.subTrainings
+                                             .Where(st => st.TrainingTypeId == trainingTypeId)
+                                             .ToListAsync();
+
+            if (subTrainings == null || !subTrainings.Any())
+            {
+                return NotFound();
+            }
+
+            var subTrainingDtos = subTrainings.Select(st => new SubTrainingDTO
+            {
+                Id = st.Id,
+                SubTrainingName = st.SubTrainingName,
+                ImgLink = st.ImgLink,
+                SubTrainingDescription = st.SubTrainingDescription,
+                TrainingTypeId = st.TrainingTypeId
+            }).ToList();
+
+            return Ok(subTrainingDtos);
+        }
+
         // DELETE: api/SubTrainings/5
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]

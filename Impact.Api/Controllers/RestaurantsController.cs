@@ -129,7 +129,6 @@ namespace Impact.Api.Controllers
            
             _context.restaurants.Add(restaurant);
             await _context.SaveChangesAsync();
-
             restaurantDto.Id = restaurant.Id;
 
             return CreatedAtAction("GetRestaurant", new { id = restaurant.Id }, restaurantDto);

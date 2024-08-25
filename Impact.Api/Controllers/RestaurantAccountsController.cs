@@ -35,7 +35,6 @@ namespace Impact.Api.Controllers
                 Id = account.Id,
                 TotalBalance = account.TotalBalance,
                 Debt = account.Debt,
-                RestaurantId = account.Restaurant.Id
             }).ToList();
 
             return Ok(restaurantAccountDtos);
@@ -58,7 +57,6 @@ namespace Impact.Api.Controllers
                 Id = restaurantAccount.Id,
                 TotalBalance = restaurantAccount.TotalBalance,
                 Debt = restaurantAccount.Debt,
-                RestaurantId = restaurantAccount.Restaurant.Id
             };
 
             return Ok(restaurantAccountDto);
