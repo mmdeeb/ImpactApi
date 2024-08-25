@@ -151,7 +151,7 @@ namespace Impact.Api.Controllers
         }
 
         // PATCH: api/EmployeeAccounts/AddDeduct/5
-        [HttpPatch("AddDeduct/{id}")]
+        [HttpPost("AddDeduct/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddDeduct(int id, [FromBody] double deduct)
         {
@@ -171,7 +171,7 @@ namespace Impact.Api.Controllers
         }
 
         // PATCH: api/EmployeeAccounts/AddAdvancePayment/5
-        [HttpPatch("AddAdvancePayment/{id}")]
+        [HttpPost("AddAdvancePayment/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddAdvancePayment(int id, [FromBody] double advancePayment)
         {
@@ -191,7 +191,7 @@ namespace Impact.Api.Controllers
         }
 
         // PATCH: api/EmployeeAccounts/AddReward/5
-        [HttpPatch("AddReward/{id}")]
+        [HttpPost("AddReward/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddReward(int id, [FromBody] double reward)
         {
