@@ -129,14 +129,15 @@ namespace Impact.Api.Controllers
                     trainingInvoice.AllAdditionalCosts += additionalCost.Cost;
                     trainingInvoice.TotalCost -= previousCost;
                     trainingInvoice.TotalCost += additionalCost.Cost;
-                    var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
-                    if (ClientAccount != null)
-                    {
-                        ClientAccount.TotalBalance -= previousCost;
-                        ClientAccount.TotalBalance += additionalCost.Cost;
-                        _context.Entry(ClientAccount).State = EntityState.Modified;
 
+                    var clientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                    if (clientAccount != null)
+                    {
+                        clientAccount.TotalBalance -= previousCost;
+                        clientAccount.TotalBalance += additionalCost.Cost;
+                        _context.Entry(clientAccount).State = EntityState.Modified;
                     }
+
                     _context.Entry(trainingInvoice).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
@@ -177,13 +178,14 @@ namespace Impact.Api.Controllers
             {
                 trainingInvoice.AllAdditionalCosts += additionalCost.Cost;
                 trainingInvoice.TotalCost += additionalCost.Cost;
-                var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
-                if (ClientAccount != null)
-                {
-                    ClientAccount.TotalBalance += additionalCost.Cost;
-                    _context.Entry(ClientAccount).State = EntityState.Modified;
 
+                var clientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                if (clientAccount != null)
+                {
+                    clientAccount.TotalBalance += additionalCost.Cost;
+                    _context.Entry(clientAccount).State = EntityState.Modified;
                 }
+
                 _context.Entry(trainingInvoice).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
@@ -213,13 +215,14 @@ namespace Impact.Api.Controllers
             {
                 trainingInvoice.AllAdditionalCosts -= cost;
                 trainingInvoice.TotalCost -= cost;
-                var ClientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
-                if (ClientAccount != null)
-                {
-                    ClientAccount.TotalBalance -= additionalCost.Cost;
-                    _context.Entry(ClientAccount).State = EntityState.Modified;
 
+                var clientAccount = await _context.clientAccounts.FirstOrDefaultAsync(ca => ca.Id == trainingInvoice.ClientAccountId);
+                if (clientAccount != null)
+                {
+                    clientAccount.TotalBalance -= cost;
+                    _context.Entry(clientAccount).State = EntityState.Modified;
                 }
+
                 _context.Entry(trainingInvoice).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }

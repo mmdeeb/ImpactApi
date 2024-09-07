@@ -111,6 +111,9 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
+            // Calculate previous discount to adjust ClientAccount balance
+            var previousDiscount = trainingInvoice.Discount;
+
             trainingInvoice.MealsCost = trainingInvoiceDto.MealsCost;
             trainingInvoice.TrainerCost = trainingInvoiceDto.TrainerCost;
             trainingInvoice.PhotoInvoiceURL = trainingInvoiceDto.PhotoInvoiceURL;
@@ -118,13 +121,25 @@ namespace Impact.Api.Controllers
             trainingInvoice.AllAdditionalCosts = trainingInvoiceDto.AllAdditionalCosts;
             trainingInvoice.TotalCost = trainingInvoiceDto.TotalCost;
             trainingInvoice.Discount = trainingInvoiceDto.Discount;
-            trainingInvoice.FinalCost = trainingInvoice.TotalCost - trainingInvoiceDto.Discount;  
-            
+            trainingInvoice.FinalCost = trainingInvoice.TotalCost - trainingInvoiceDto.Discount;
+
             _context.Entry(trainingInvoice).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                // Update ClientAccount discount
+                var clientAccount = await _context.clientAccounts.FindAsync(trainingInvoice.ClientAccountId);
+                if (clientAccount != null)
+                {
+                    clientAccount.Discount -= previousDiscount;
+                    clientAccount.Discount += trainingInvoice.Discount;
+                    clientAccount.TotalBalance = clientAccount.TotalBalance - previousDiscount + trainingInvoice.Discount;
+
+                    _context.Entry(clientAccount).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -141,8 +156,8 @@ namespace Impact.Api.Controllers
             return NoContent();
         }
 
-        // PATCH: api/TrainingInvoices/UpdateDiscount/5
-        [HttpPatch("UpdateDiscount/{id}")]
+        // PUT: api/TrainingInvoices/UpdateDiscount/5
+        [HttpPut("UpdateDiscount/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDiscount(int id, [FromBody] double discount)
         {
@@ -152,14 +167,30 @@ namespace Impact.Api.Controllers
                 return NotFound();
             }
 
+            // Calculate previous discount to adjust ClientAccount balance
+            var previousDiscount = trainingInvoice.Discount;
+
             trainingInvoice.Discount = discount;
             trainingInvoice.FinalCost = trainingInvoice.TotalCost - discount;
-            
+
             _context.Entry(trainingInvoice).State = EntityState.Modified;
             await _context.SaveChangesAsync();
-            
+
+            // Update ClientAccount discount
+            var clientAccount = await _context.clientAccounts.FindAsync(trainingInvoice.ClientAccountId);
+            if (clientAccount != null)
+            {
+                clientAccount.Discount -= previousDiscount;
+                clientAccount.Discount += discount;
+                clientAccount.TotalBalance = clientAccount.TotalBalance - previousDiscount + discount;
+
+                _context.Entry(clientAccount).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
             return NoContent();
         }
+
 
         // DELETE: api/TrainingInvoices/5
         [HttpDelete("{id}")]
