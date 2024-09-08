@@ -175,8 +175,8 @@ namespace Impact.Api.Controllers
                     var clientAccount = trainingInvoice.ClientAccount;
                     if (clientAccount != null)
                     {
-                        clientAccount.TotalBalance -= previousTotalPriceForORG;
-                        clientAccount.TotalBalance += mail.TotalPriceForORG;
+                        clientAccount.Debt -= previousTotalPriceForORG;
+                        clientAccount.Debt += mail.TotalPriceForORG;
                         _context.Entry(clientAccount).State = EntityState.Modified;
                     }
 
@@ -187,8 +187,8 @@ namespace Impact.Api.Controllers
                 var restaurantAccount = await _context.restaurantAccounts.FindAsync(mailDto.RestaurantAccountId);
                 if (restaurantAccount != null)
                 {
-                    restaurantAccount.TotalBalance -= previousTotalPrice;
-                    restaurantAccount.TotalBalance += mail.TotalPrice;
+                    restaurantAccount.Debt -= previousTotalPrice;
+                    restaurantAccount.Debt += mail.TotalPrice;
                     _context.Entry(restaurantAccount).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
@@ -236,7 +236,7 @@ namespace Impact.Api.Controllers
                 var clientAccount = trainingInvoice.ClientAccount;
                 if (clientAccount != null)
                 {
-                    clientAccount.TotalBalance += mail.TotalPriceForORG;
+                    clientAccount.Debt += mail.TotalPriceForORG;
                     _context.Entry(clientAccount).State = EntityState.Modified;
                 }
 
@@ -247,7 +247,7 @@ namespace Impact.Api.Controllers
             var restaurantAccount = await _context.restaurantAccounts.FindAsync(mail.RestaurantAccountId);
             if (restaurantAccount != null)
             {
-                restaurantAccount.TotalBalance += mail.TotalPrice;
+                restaurantAccount.Debt += mail.TotalPrice;
                 _context.Entry(restaurantAccount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
@@ -282,7 +282,7 @@ namespace Impact.Api.Controllers
                 var clientAccount = trainingInvoice.ClientAccount;
                 if (clientAccount != null)
                 {
-                    clientAccount.TotalBalance -= totalPriceForORG;
+                    clientAccount.Debt -= totalPriceForORG;
                     _context.Entry(clientAccount).State = EntityState.Modified;
                 }
 
@@ -293,7 +293,7 @@ namespace Impact.Api.Controllers
             var restaurantAccount = await _context.restaurantAccounts.FindAsync(mail.RestaurantAccountId);
             if (restaurantAccount != null)
             {
-                restaurantAccount.TotalBalance -= totalPrice;
+                restaurantAccount.Debt -= totalPrice;
                 _context.Entry(restaurantAccount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }

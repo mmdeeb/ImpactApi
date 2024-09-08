@@ -135,7 +135,7 @@ namespace Impact.Api.Controllers
                 {
                     clientAccount.Discount -= previousDiscount;
                     clientAccount.Discount += trainingInvoice.Discount;
-                    clientAccount.TotalBalance = clientAccount.TotalBalance - previousDiscount + trainingInvoice.Discount;
+                    clientAccount.Debt = clientAccount.Debt - previousDiscount + trainingInvoice.Discount;
 
                     _context.Entry(clientAccount).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
@@ -182,7 +182,7 @@ namespace Impact.Api.Controllers
             {
                 clientAccount.Discount -= previousDiscount;
                 clientAccount.Discount += discount;
-                clientAccount.TotalBalance = clientAccount.TotalBalance - previousDiscount + discount;
+                clientAccount.Debt = clientAccount.Debt - previousDiscount + discount;
 
                 _context.Entry(clientAccount).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
